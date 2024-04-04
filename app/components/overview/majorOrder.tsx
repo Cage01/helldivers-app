@@ -51,10 +51,10 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
                 if (planet.majorOrderAssociation == MajorOrderAssociation.mainObjective || (planet.hasEvent && planet.enemyFactionID == assignmentEnemy)) {
                     count += planet.playerCount;
                 } else if (planet.majorOrderAssociation == MajorOrderAssociation.associated
-                     && !allPlanets.some((e) => e.majorOrderAssociation == MajorOrderAssociation.mainObjective)) {
-                        
+                    && !allPlanets.some((e) => e.majorOrderAssociation == MajorOrderAssociation.mainObjective)) {
+
                     count += planet.playerCount;
-                } else if (planet.majorOrderAssociation == MajorOrderAssociation.tertiary 
+                } else if (planet.majorOrderAssociation == MajorOrderAssociation.tertiary
                     && (!allPlanets.some((e) => e.majorOrderAssociation >= MajorOrderAssociation.associated))) {
 
                     count += planet.playerCount;
@@ -124,7 +124,10 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
                         </div>
                     </CardBody>
                 </Card>
-                : <Spinner color="default" />}
+                :
+                <div className='flex-wrap items-center justify-center'>
+                    <Spinner color="default" />
+                </div>}
 
         </div>
     )

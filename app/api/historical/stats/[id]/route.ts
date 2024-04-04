@@ -1,4 +1,5 @@
 import FirebaseInstance from "@/app/classes/firebase";
+import moment from "moment";
 
 async function requestHandler(_request: Request): Promise<Response> {
     let params = new URL(_request.url)
@@ -11,7 +12,13 @@ async function requestHandler(_request: Request): Promise<Response> {
     const firebase = new FirebaseInstance();
     let resEvent = await firebase.getGlobalEventByID(id)
 
-    let created = new Date(resEvent[0].data().created.seconds * 1000)
+    let created
+    if (resEvent.length > 0) {
+       created = new Date(resEvent[0].data().created.seconds * 1000)
+    } else {
+        //Major orders have swapped and nothing is currently up
+        created = moment().subtract("3", "hours").toDate()
+    }
 
     try {
         //Get all stats since that time

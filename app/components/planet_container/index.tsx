@@ -317,6 +317,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                     showValueLabel={true} formatOptions={{ style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2, compactDisplay: 'short' }}
                     className='pl-1 -mt-10 smphone:-ml-4 phone:-ml-14 xs:-ml-20 sm:-ml-28' style={{ position: "absolute", width: "10rem", zIndex: "10" }} /> */}
 
+                  {/* <p className='small-info'>{(decayRate > 0) ? "+" : ""}<AnimatedNumber aria-label="decay" value={decayRate} formatValue={formatDecay} duration={1100} />% /h</p> */}
 
                   <CircularProgress
                     aria-label="Democratizing"
