@@ -1,0 +1,125 @@
+#banner {
+    height: 45rem;
+    width: 100%;
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    overflow: hidden;
+}
+
+.planet {
+    opacity: 0.85;
+    font-size: 0.64em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.map {
+    display: grid;
+    place-content: center;
+
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.scatter-chart {
+    float: left;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 2;
+    /* Middle stacking order */
+}
+
+.planet-location {
+    background-clip: content-box;
+    position: absolute;
+    
+    width: 1%;
+    height: 1%;
+    background-color: orangered;
+    box-shadow: rgba(255, 69, 0, 0.5) 0 0 4px 3px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.superearth-location {
+    background-clip: content-box;
+    position: absolute;
+    
+    width: 1%;
+    height: 1%;
+    background-color: rgba(88, 142, 204, 0.897);
+    box-shadow: rgba(58, 108, 218, 0.4) 0 0 4px 3px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.planet-location:hover {
+    cursor: pointer;
+}
+
+.blink {
+    animation: blinker 2s infinite;
+}
+  
+@keyframes blinker {
+    from { opacity: 1.0; }
+    50% { opacity: 0.5; }
+    to { opacity: 1.0; }
+}
+
+
+  
+
+#title {
+    top: 50%;
+    left: 0;
+    right: 0;
+    color: #FFF;
+    text-align: center;
+    font-family: "lato", sans-serif;
+    font-weight: 300;
+    font-size: 50px;
+    letter-spacing: 10px;
+    padding-left: 10px;
+}
+
+
+#players {
+    text-align: center;
+    font-family: "lato", sans-serif;
+    font-weight: 300;
+    font-size: 25px;
+    letter-spacing: 3px;
+    padding-left: 10px;
+}
+
+#credit {
+    text-align: center;
+    font-family: "lato", sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    padding-left: 10px;
+}
+
+#credit span {
+    background: -webkit-linear-gradient(white, #38495a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#players span {
+    background: -webkit-linear-gradient(white, #38495a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#title span {
+    background: -webkit-linear-gradient(white, #38495a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

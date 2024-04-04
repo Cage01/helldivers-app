@@ -1,0 +1,24 @@
+.subtitle {
+    font-family: 'lato', 'sans-serif';
+    font-weight: 450;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    padding-left: 10px;
+
+    background: -webkit-linear-gradient(white, #bdc8d3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+ul {
+    list-style-type: circle;
+    margin-left: 2rem;
+  }
+
+  img[src=\/images\/helldiver_salute\.webp] {
+    display: inline-block;
+    float: left;
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+  }

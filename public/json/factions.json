@@ -1,0 +1,14 @@
+{
+    "1": {
+        "name": "Human",
+        "image": "/images/super_earth2.jpeg"
+    },
+    "2": {
+        "name": "Terminid",
+        "image": "/images/terminid.svg"
+    },
+    "3": {
+        "name": "Automaton",
+        "image": "/images/automaton.svg"
+    }
+}

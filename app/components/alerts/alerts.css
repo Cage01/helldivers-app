@@ -1,0 +1,123 @@
+.breaking-news-alert {
+  width: 100%;
+  background-color: #d0343a;
+  opacity: 0.8;
+  background-image: linear-gradient(90deg, #a72b30 50%, #d4373d 50%);
+  color: white;
+}
+
+.breaking-news-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px;
+  background-image: linear-gradient(105deg, #a72b30 95px, #d4373d 95px);
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 45px;
+
+}
+
+
+.embla {
+  overflow: hidden;
+  padding-left: 15px;
+}
+
+.embla__container {
+  display: flex;
+}
+
+.embla__slide {
+  flex: 0 0 100%;
+  min-width: 50px;
+  margin-right: 20px;
+}
+
+
+.embla__controls {
+  padding-top: 0.3rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.embla__buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.embla__button {
+  -webkit-tap-highlight-color: rgba(230, 230, 230, 0.952);
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  touch-action: manipulation;
+  display: inline-flex;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  box-shadow: inset 0 0 0 0.2rem rgb(97, 35, 35);
+  width: 3.6rem;
+  height: 3.6rem;
+  z-index: 1;
+  border-radius: 50%;
+  color: rgb(222, 222, 222);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.embla__button:disabled {
+  color: rgb(101, 101, 101);
+}
+
+
+.embla__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: calc((2.6rem - 1.4rem) / 2 * -1);
+}
+.embla__dot {
+  -webkit-tap-highlight-color: rgba(230, 230, 230, 0.5);
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  touch-action: manipulation;
+  display: inline-flex;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  margin-right: 5px;
+  width: 0.8rem;
+  height: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.embla__dot:after {
+  box-shadow: inset 0 0 0 0.2rem rgb(97, 35, 35);
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  content: '';
+}
+.embla__dot--selected:after {
+  box-shadow: inset 0 0 0 0.2rem rgb(222, 222, 222);
+}
