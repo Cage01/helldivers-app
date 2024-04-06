@@ -2,6 +2,7 @@ import { GalaxyStatus, PlanetEvent, PlanetStatus } from "../types/api/helldivers
 import { WarInfo, PlanetInfo } from "../types/api/helldivers/war_info_types";
 import Planet from "../classes/planet";
 import { MajorOrderAssociation } from "../classes/enums";
+import { FCampaignProgress } from "../types/firebase_types";
 
 export function getPlanetStatus(index: number, status: GalaxyStatus): PlanetStatus {
     var planet: PlanetStatus = status.planetStatus[0]
@@ -104,6 +105,41 @@ export function sortPlanets(planets: Planet[], sortByPercentage: boolean = false
 
     return planets;
 }
+
+
+export function getDecayRate(maxHealth: number, regenRate: number, hasEvent: boolean, history?: FCampaignProgress[]) {
+    if (history != undefined) {
+        let liberation: number[] = []
+  
+        for (let i = 0; i < history.length; i++) {
+          let curr = 100 - ((history[i].health / history[i].maxHealth) * 100)
+          liberation.push(curr)
+        }
+      
+      
+        let meanDiff = 0;
+        for (let i = 1; i < liberation.length; i++) {
+          meanDiff += liberation[i] - liberation[i - 1]
+        }
+      
+        /*
+        * meanDiff / healthDifferenceHistory.length comes out to be mean health of 5 minutes over the course of the last 30 minutes
+        * Divide by 300 to get health difference per second
+        * Multiply by 100 to get percentage
+        * Multiply by 60 to get per hour value
+        */
+        meanDiff = Math.max((meanDiff / history.length) * 12, 0)
+      
+        let regenPerHour = 0
+        if (!hasEvent)
+          regenPerHour = (((regenRate / maxHealth) * 100) * 60)
+      
+        let decayRate = meanDiff - regenPerHour;
+        return decayRate
+    }
+
+    return 0;
+  }
 // export function getRealtimeExpiration(currentServerTime: number, endServerTime: number) {
 //     let delta = moment().add((endServerTime - currentServerTime), 'seconds').toDate().getTime()
     

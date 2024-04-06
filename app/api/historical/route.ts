@@ -1,4 +1,6 @@
 import FirebaseInstance from "@/app/classes/firebase";
+import { HistoricalAPI, StatusAPI } from "@/app/types/app_types";
+import { queryExternal } from "@/app/utilities/server_functions";
 import moment from "moment";
 
 
@@ -9,8 +11,21 @@ async function requestHandler(_request: Request): Promise<Response> {
     let hours: number = Number(params.searchParams.get("hours"))
 
     let dbResponse = new FirebaseInstance();
-    let newerThan = moment(new Date()).subtract(hours, 'hours').toDate()
-    let progress = await dbResponse.geProgressData(planetID, campaignID, newerThan);
+    let newerThan = moment(new Date()).subtract((hours != undefined) ? hours : 0, 'hours').toDate()
+
+    let progress: HistoricalAPI[] = [];
+    if (planetID == 0 || campaignID == 0) {
+        let status: StatusAPI | undefined = await queryExternal();
+        if (status != undefined) {
+            for (let i = 0; i < status.status.campaigns.length; i++) {
+                let element = status.status.campaigns[i]
+                progress.push({campaignId: element.id, progress: await dbResponse.geProgressData(element.planetIndex, element.id, newerThan)})
+            }
+        }
+
+    } else {
+        progress.push({campaignId: campaignID, progress: await dbResponse.geProgressData(planetID, campaignID, newerThan)})
+    }
 
     return Response.json(progress);
 }

@@ -2,6 +2,8 @@ import { Campaign } from "../types/api/helldivers/galaxy_status_types";
 import fs from 'fs';
 import path from "path";
 import { SteamNews } from "../types/api/steam/steam_news_types";
+import { WarInfo } from "../types/api/helldivers/war_info_types";
+import { StatusAPI } from "../types/app_types";
 
 const baseURL = "https://api.live.prod.thehelldiversgame.com/api/"
 
@@ -31,12 +33,12 @@ export async function queryExternal() {
             campaignWaypoints.push({ planetIndex: element.planetIndex, planetName: getPlanetNameFromID(element.planetIndex), campaignId: element.id, waypoints: warInfo.planetInfos[element.planetIndex].waypoints })
         });
 
-        return ({ info: warInfo, status: status, campaignWaypoints: campaignWaypoints })
+        return ({ info: warInfo, status: status, campaignWaypoints: campaignWaypoints } as StatusAPI)
     } catch (error) {
         console.error(error)
     }
 
-    return {};
+    return {} as StatusAPI;
 }
 
 export async function queryNewsFeedExternal() {

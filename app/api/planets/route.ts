@@ -2,6 +2,7 @@ import { queryExternal, getRandomPlanetImage } from "@/app/utilities/server_func
 import { getPlanetStatus, getPlanetInfo, getPlanetEvent } from "@/app/utilities/client_functions";
 import path from "path";
 import fs from 'fs';
+import { StatusAPI } from "@/app/types/app_types";
 
 interface campaign {
   id: number,
@@ -17,13 +18,13 @@ interface campaign {
 }
 
 async function requestHandler(_request: Request): Promise<Response> {
-  let { info, status } = await queryExternal()
+  let apiStatus: StatusAPI = await queryExternal()
 
   let res: campaign[] = [];
 
-  if (info != undefined && status != undefined) {
-    for (let i = 0; i < status.campaigns.length; i++) {
-      let campaign = status.campaigns[i]
+  if (apiStatus.info != undefined && apiStatus.status != undefined) {
+    for (let i = 0; i < apiStatus.status.campaigns.length; i++) {
+      let campaign = apiStatus.status.campaigns[i]
 
       const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
 
@@ -36,9 +37,9 @@ async function requestHandler(_request: Request): Promise<Response> {
         planetImage = getRandomPlanetImage();
       }
 
-      let planetStatus = getPlanetStatus(campaign.planetIndex, status)
-      let planetInfo = getPlanetInfo(campaign.planetIndex, info)
-      let planetEvent = getPlanetEvent(campaign.planetIndex, status)
+      let planetStatus = getPlanetStatus(campaign.planetIndex, apiStatus.status)
+      let planetInfo = getPlanetInfo(campaign.planetIndex, apiStatus.info)
+      let planetEvent = getPlanetEvent(campaign.planetIndex, apiStatus.status)
 
       let factionID = 0
 

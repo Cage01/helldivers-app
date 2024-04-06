@@ -12,6 +12,8 @@ import { FCampaignProgress } from '@/app/types/firebase_types';
 import { fetcher } from '@/app/classes/fetch';
 import AnimatedNumber from "animated-number-react";
 import PlanetStats from './planetStats';
+import { getDecayRate } from '@/app/utilities/client_functions';
+import { HistoricalAPI } from '@/app/types/app_types';
 
 
 const neutral: string = "/images/neutral_icon.svg"
@@ -64,14 +66,15 @@ function PlanetContainer(props: { planetStats: Planet }) {
   const [victoryPrediction, setVictoryPrediction] = useState<number>();
   const [firstLoad, setFirstLoad] = useState(true)
 
-  const history = useSWR("/api/historical?planetID=" + props.planetStats.index + "&campaignID=" + props.planetStats.campaign.id + "&hours=1", fetcher, { refreshInterval: 600000 }).data;
+  const history: HistoricalAPI[] = useSWR("/api/historical?planetID=" + props.planetStats.index + "&campaignID=" + props.planetStats.campaign.id + "&hours=1", fetcher, { refreshInterval: 600000 }).data;
 
   //console.log(victoryPrediction)
   //console.log("=======")
   useEffect(() => {
     if (history != undefined) {
+      
       //console.log(history)
-      let tmpDecay = getDecayRate(props.planetStats.maxHealth, props.planetStats.status.regenPerSecond, props.planetStats.hasEvent, history);
+      let tmpDecay = getDecayRate(props.planetStats.maxHealth, props.planetStats.status.regenPerSecond, props.planetStats.hasEvent, history[0].progress);
       if (decayRate != tmpDecay) {
         setDecayRate(Number(tmpDecay.toLocaleString('en', { maximumFractionDigits: 3 })))
 
@@ -317,22 +320,53 @@ function PlanetContainer(props: { planetStats: Planet }) {
                     showValueLabel={true} formatOptions={{ style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2, compactDisplay: 'short' }}
                     className='pl-1 -mt-10 smphone:-ml-4 phone:-ml-14 xs:-ml-20 sm:-ml-28' style={{ position: "absolute", width: "10rem", zIndex: "10" }} /> */}
 
-                  {/* <p className='small-info'>{(decayRate > 0) ? "+" : ""}<AnimatedNumber aria-label="decay" value={decayRate} formatValue={formatDecay} duration={1100} />% /h</p> */}
+                  <div className='flex justify-center'>
+                    <p className={((decayRate > 0) ? 'text-green-500' : 'text-red-500') + ' bg-[#18181a] mt-2 w-36 -mb-1 text-center font-bold text-medium rounded-lg font-[lato]'}>{(decayRate > 0) ? "+" : ""}<AnimatedNumber aria-label="decay" value={decayRate} formatValue={formatDecay} duration={1100} />% /h</p>
 
-                  <CircularProgress
-                    aria-label="Democratizing"
-                    size="lg"
-                    className='absolute smphone:-ml-6 smphone:-mt-12 phone:-ml-11 xs:-ml-20 sm:-ml-[7rem] -mt-16 z-50'
-                    classNames={{
-                      svg: "w-[3.7rem] h-[3.7rem] drop-shadow-md",
-                      value: "text-sm font-semibold text-white",
-                    }}
-                    strokeWidth={2}
-                    value={Number(liberation.toFixed(2))}
-                    color="warning"
-                    formatOptions={{ style: "unit", unit: "percent" }}
-                    showValueLabel={true}
-                  />
+                  </div>
+                  <div className='flex justify-center'>
+                    <Tooltip content="Victory prediction countdown" placement='bottom'>
+                      <div className='before:bg-white/10 border-white/20 border-1 rounded-large px-3 shadow-small text-sm mt-3 -mb-2 flex'>
+                        {(victoryPrediction != undefined) &&
+                          (victoryPrediction > props.planetStats.time && victoryPrediction > 0 && victoryPrediction < (props.planetStats.time + 864000)) ?
+                          <>
+                            <Image src='/images/victory.svg' width={27} />
+
+                            <CountdownTimer className="pl-1 pt-[3px] flex-grow" currentTime={props.planetStats.time} endTime={victoryPrediction} />
+                          </>
+                          : <p>Victory Unknown</p>
+                        }
+                      </div>
+                    </Tooltip>
+                  </div>
+                  <p className='smphone:text-xs sm:text-small font-[lato] absolute mt-5 sm:ml-60 smphone:ml-48'><AnimatedNumber aria-label="players" value={playerCount} formatValue={formatValue} duration={1100} /> Players</p>
+
+                  <div className='absolute smphone:-ml-10 smphone:-mt-28 phone:-ml-12 xs:-ml-20 sm:-ml-[7rem] sm:-mt-[6.6rem] z-50'>
+                    {hasEvent &&    
+                      <Tooltip content="Defense expiration timer">
+                        <div className='before:border-red-600/70 border-red-600/90 border-1 rounded-large px-3 shadow-small text-sm mt-3 -mb-2 flex py-1'>
+                          <Image src='/images/expire.svg' width={20} />
+
+                          <CountdownTimer className="text-sm flex-grow leading-[1.05rem] pl-1 text-red-400" currentTime={props.planetStats.time} endTime={victoryPrediction} />
+                        </div>
+                      </Tooltip>
+                    }
+                    <CircularProgress
+                      aria-label="Democratizing"
+                      size="lg"
+                      className= {(hasEvent ? "smphone:ml-4 sm:ml-7" : 'smphone:ml-3 sm:ml-0') + ' mt-5'}
+                      classNames={{
+                        svg: "w-[4rem] h-[4rem] drop-shadow-md",
+                        value: "text-sm font-semibold text-white",
+                      }}
+                      strokeWidth={2}
+                      value={Number(liberation.toFixed(2))}
+                      color="warning"
+                      formatOptions={{ style: "unit", unit: "percent" }}
+                      showValueLabel={true}
+                    />
+                  </div>
+
 
                 </div>
                 {/* <span className={((decayRate > 0) ? 'text-green-600' : 'text-red-700') + ' small-info z-10 absolute ml-80 smphone:mr-5'} style={{marginTop: "16.8rem", fontWeight: "bold"}}>{(decayRate > 0) ? "+" : ""}{decayRate}% /h</span> */}
@@ -351,14 +385,6 @@ function PlanetContainer(props: { planetStats: Planet }) {
                     Join the other <b>{playerCount.toLocaleString('en', { useGrouping: true })}</b> brave Helldivers and fight for Managed Democracy!
                   </p>
 
-                  {(victoryPrediction != undefined) &&
-                    (victoryPrediction > props.planetStats.time && victoryPrediction > 0 && victoryPrediction < (props.planetStats.time + 864000)) ?
-
-                    <span className='text-gray-400 inline-block float-right text-xs text-right'><CountdownTimer currentTime={props.planetStats.time} endTime={victoryPrediction} /></span>
-                    :
-                    <span className='text-gray-400 inline-block float-right text-xs text-right'></span>
-
-                  }
                 </div>
                 {/* </Tab> */}
                 {/* <Tab key="stats_1" title="Stats">
@@ -387,35 +413,6 @@ function PlanetContainer(props: { planetStats: Planet }) {
   )
 }
 
-function getDecayRate(maxHealth: number, regenRate: number, hasEvent: boolean, history: FCampaignProgress[]) {
-  let liberation: number[] = []
-
-  for (let i = 0; i < history.length; i++) {
-    let curr = 100 - ((history[i].health / history[i].maxHealth) * 100)
-    liberation.push(curr)
-  }
-
-
-  let meanDiff = 0;
-  for (let i = 1; i < liberation.length; i++) {
-    meanDiff += liberation[i] - liberation[i - 1]
-  }
-
-  /*
-  * meanDiff / healthDifferenceHistory.length comes out to be mean health of 5 minutes over the course of the last 30 minutes
-  * Divide by 300 to get health difference per second
-  * Multiply by 100 to get percentage
-  * Multiply by 60 to get per hour value
-  */
-  meanDiff = Math.max((meanDiff / history.length) * 12, 0)
-
-  let regenPerHour = 0
-  if (!hasEvent)
-    regenPerHour = (((regenRate / maxHealth) * 100) * 60)
-
-  let decayRate = meanDiff - regenPerHour;
-  return decayRate
-}
 
 
 export default PlanetContainer

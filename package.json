@@ -25,7 +25,6 @@
     "faker": "^5.5.3",
     "firebase": "^10.8.1",
     "firestore": "^1.1.6",
-    "framer-motion": "^11.0.8",
     "fs": "^0.0.1-security",
     "html-react-parser": "^5.1.8",
     "html-to-image": "^1.11.11",

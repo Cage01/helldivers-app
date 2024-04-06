@@ -1,27 +1,21 @@
 import { GalaxyStatus } from "./api/helldivers/galaxy_status_types";
 import { WarInfo } from "./api/helldivers/war_info_types";
+import { FCampaignProgress } from "./firebase_types";
 
 export type PlanetsAPI = {
     id:      number;
-    planet:  Planet;
-    faction: Faction;
+    planet:  {index: number, name: string, image: string};
+    faction: {name: string, image: string};
 }
-
-export type Planet = {
-    index: number
-    name:  string;
-    image: string;
-}
-
-export type Faction = {
-    name:  string;
-    image: string;
-}
-
 export type StatusAPI = {
     info:              WarInfo;
     status:            GalaxyStatus;
     campaignWaypoints: CampaignWaypoint[];
+}
+
+export type HistoricalAPI = {
+    campaignId: number,
+    progress: FCampaignProgress[]
 }
 
 export type CampaignWaypoint = {
