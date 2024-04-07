@@ -6,7 +6,7 @@ import BBCode from '@bbob/react/lib';
 import presetReact from '@bbob/preset-react/lib';
 
 import { Newsitem, SteamNews } from '@/app/types/api/steam/steam_news_types';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 interface Item {
     patchNum: string,
@@ -55,10 +55,11 @@ function PatchNotesButton(props: { news: SteamNews }) {
                 .replace("[b]Helldiver", "[img]/images/helldiver_salute.webp[/img] [b]Helldiver")
 
             //Parse patch number if possible and grab contents
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             newsItems.push({
                 patchNum: newsItem.title.split(/(\d.*)/, 2)[1],
                 title: newsItem.title.replaceAll("🛠️", "").replaceAll("⚙️",""),
-                date: (moment(new Date(newsItem.date * 1000))).format('MMM DD YYYY HH:mm A'),
+                date: moment(new Date(newsItem.date * 1000)).tz(tz).format('MMM DD YYYY HH:mm A'),
                 contents: content
             })
             //break

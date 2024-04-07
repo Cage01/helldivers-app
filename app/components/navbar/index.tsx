@@ -1,14 +1,20 @@
 import React from "react";
 import Logo from "./Logo";
 import Button from "./patchNotes";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
-import {  SteamNews } from "@/app/types/api/steam/steam_news_types";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Image } from "@nextui-org/react";
+import { SteamNews } from "@/app/types/api/steam/steam_news_types";
 import './navbar.scss'
+import FirebaseInstance from "@/app/classes/firebase";
 
 async function Navigation() {
   //TODO: need to store in DB and check for new updates. If none exists then use DB version
   const res_steam_news = await fetch('https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=' + process.env.NEXT_PUBLIC_STEAM_APP_ID + "&count=500")
   const news: SteamNews = await res_steam_news.json();
+
+  const db = new FirebaseInstance();
+  const res_site_message = await db.getSiteMessage() as { SiteMessage: string, timestamp: { seconds: number, nanoseconds: number } };
+  const timestamp = new Date(res_site_message.timestamp.seconds * 1000)
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return (
     <>
@@ -23,20 +29,20 @@ async function Navigation() {
             </Link>
           </NavbarItem>
           <NavbarItem >
-            
-              <Link href="/timeline" isDisabled style={{color: "white"}}>
-                Timeline
-              </Link>
+
+            <Link href="/timeline" isDisabled style={{ color: "white" }}>
+              Timeline
+            </Link>
           </NavbarItem>
           <NavbarItem>
-              <Link color="foreground" href="/coalitions" isDisabled>
-                Coalitions
-              </Link>
+            <Link color="foreground" href="/coalitions" isDisabled>
+              Coalitions
+            </Link>
           </NavbarItem>
           <NavbarItem>
-              <Link color="foreground" href="/newsfeed" isDisabled>
-                News Feed
-              </Link>
+            <Link color="foreground" href="/newsfeed" isDisabled>
+              News Feed
+            </Link>
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
@@ -44,7 +50,17 @@ async function Navigation() {
             <Button news={news} />
           </NavbarItem>
         </NavbarContent>
+
       </Navbar>
+      {(Object.keys(res_site_message).length > 0) ?
+        <div className="fixed z-[50] w-full bg-[#aa2d31]/80 font-bold py-2 px-1">
+          <p className="text-center text-tiny text-gray-300">{timestamp.toLocaleString('en-US', { timeZone: tz })}</p>
+          <p className="text-center text-sm text-gray-200">{res_site_message.SiteMessage}</p>
+        </div>
+        :
+        <></>
+      }
+
     </>
 
   );

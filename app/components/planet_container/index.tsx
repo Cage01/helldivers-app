@@ -8,10 +8,8 @@ import * as htmlToImage from 'html-to-image';
 import moment from 'moment';
 import Planet from '@/app/classes/planet';
 import useSWR from 'swr';
-import { FCampaignProgress } from '@/app/types/firebase_types';
 import { fetcher } from '@/app/classes/fetch';
 import AnimatedNumber from "animated-number-react";
-import PlanetStats from './planetStats';
 import { getDecayRate } from '@/app/utilities/client_functions';
 import { HistoricalAPI } from '@/app/types/app_types';
 
@@ -41,7 +39,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
       return
     }
 
-    htmlToImage.toPng(ref.current, { cacheBust: true })
+    htmlToImage.toPng(ref.current, { cacheBust: true, width: 600 })
       .then((dataUrl) => {
 
         const link = document.createElement('a')
@@ -321,7 +319,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                     className='pl-1 -mt-10 smphone:-ml-4 phone:-ml-14 xs:-ml-20 sm:-ml-28' style={{ position: "absolute", width: "10rem", zIndex: "10" }} /> */}
 
                   <div className='flex justify-center'>
-                    <p className={((decayRate > 0) ? 'text-green-500' : 'text-red-500') + ' bg-[#18181a] mt-2 w-36 -mb-1 text-center font-bold text-medium rounded-lg font-[lato]'}>{(decayRate > 0) ? "+" : ""}<AnimatedNumber aria-label="decay" value={decayRate} formatValue={formatDecay} duration={1100} />% /h</p>
+                    <p className={((decayRate > 0) ? 'text-green-500' : 'text-red-500') + ' bg-[#18181a] mt-2 w-36 -mb-1 text-center font-bold text-medium rounded-lg'}>{(decayRate > 0) ? "+" : ""}<AnimatedNumber aria-label="decay" value={decayRate} formatValue={formatDecay} duration={1100} />% /h</p>
 
                   </div>
                   <div className='flex justify-center'>
@@ -339,7 +337,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                       </div>
                     </Tooltip>
                   </div>
-                  <p className='smphone:text-xs sm:text-small font-[lato] absolute mt-5 sm:ml-60 smphone:ml-48'><AnimatedNumber aria-label="players" value={playerCount} formatValue={formatValue} duration={1100} /> Players</p>
+                  <p className='smphone:text-xs sm:text-small absolute mt-5 sm:ml-60 smphone:ml-48'><AnimatedNumber aria-label="players" value={playerCount} formatValue={formatValue} duration={1100} /> Players</p>
 
                   <div className='absolute smphone:-ml-10 smphone:-mt-28 phone:-ml-12 xs:-ml-20 sm:-ml-[7rem] sm:-mt-[6.6rem] z-50'>
                     {hasEvent &&    

@@ -31,6 +31,7 @@
     "lodash": "^4.17.21",
     "mocker-data-generator": "^3.0.3",
     "moment": "^2.30.1",
+    "moment-timezone": "^0.5.45",
     "next": "14.1.2",
     "react": "^18.2.0",
     "react-animated-numbers": "^0.18.0",
