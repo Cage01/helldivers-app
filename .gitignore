@@ -42,3 +42,6 @@ functions/.env
 
 #junk
 scripts/*
+firestore.indexes.json
+firestore.rules
+firebase-debug.log
