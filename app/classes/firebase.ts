@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, query, collection, orderBy, getDocs, where, doc, getDoc, collectionGroup, and, limit } from "firebase/firestore";
+import { getFirestore, query, collection, orderBy, getDocs, where, doc, getDoc, collectionGroup, and, limit, onSnapshot, QuerySnapshot } from "firebase/firestore";
 import { FCampaignProgress, FGlobalEvent } from "../types/firebase_types";
+
 
 
 
@@ -64,6 +65,14 @@ export default class FirebaseInstance {
         return events;
     }
 
+    async getLastGlobalEvent() {
+        const q = query(collectionGroup(this.db, "GlobalEvents"), orderBy("updated", "desc"), limit(1));
+
+        const eventSnapshot = await getDocs(q);
+        // eventSnapshot.metadata
+        return eventSnapshot.docs[0].data() as FGlobalEvent;
+    }
+
     async getGlobalEventByID(id: number) {
         const q = query(collectionGroup(this.db, "GlobalEvents"), where("id", "==", id));
 
@@ -73,10 +82,21 @@ export default class FirebaseInstance {
     }
 
     async getSiteMessage() {
-        const docRef = doc(this.db, "HelldiversDB", ...["Site"]);
-        const docSnap = await getDoc(docRef);
-        // /console.log(docSnap.data())
-        return docSnap.data()
+
+        const q = query(collection(this.db, "HelldiversDB", ...["Site", "Messages"]), orderBy("timestamp", "desc"), limit(1));
+        const messageSnap = await getDocs(q);
+
+        // eventSnapshot.metadata
+        if (messageSnap.docs.length > 0) {
+            if ((messageSnap.docs[0].data().expires.seconds * 1000) <= new Date().getTime()) {
+                return {}
+            }
+    
+            return messageSnap.docs[0].data();
+        }
+
+        return {}
+        
     }
 
     async getGalaxyStats(fromDate: Date) {
