@@ -240,6 +240,7 @@ async function writeToDB() {
 
         });
 
+        checkDBGlobalEvent(assignmentData)
         checkDBCompare(statusData)
 
         // eventSnapshot.docs.forEach(element => {
@@ -420,6 +421,33 @@ async function checkDBCompare(statusData: any) {
                     resultFlag: Results.success
                 })
             }
+        }
+    });
+}
+
+async function checkDBGlobalEvent(assignmentData: any[]) {
+    const now = new Date();
+    const q = query(collectionGroup(db, "GlobalEvents"), 
+        where("expires", ">=", now), 
+        where("progress", "array-contains", 0));
+
+    const eventSnapshot = await getDocs(q);
+    eventSnapshot.forEach(async element => {
+
+        //Check API results. If no ID's match up, then update the progress
+        const find = assignmentData.find(a => a.id32 == element.data().id)
+        if (find == undefined) {
+            const docRef = doc(db, "HelldiversDB", ...["WarSeason_801", "GlobalEvents", element.data().id.toString()]);
+
+            let progress: number[] = []
+            for (let i = 0; i < element.data().progress.length; i++) {
+                progress.push(1)
+            }
+            //Update timestamp & progress
+            await updateDoc(docRef, {
+                updated: now,
+                progress: progress,
+            })
         }
     });
 }
