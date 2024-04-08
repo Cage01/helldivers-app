@@ -1,3 +1,5 @@
+import { Reward, Task } from "./api/helldivers/assignment_types";
+
 export type FCampaignProgress = {
     impactMultiplier: number,
     health: number,
@@ -9,16 +11,17 @@ export type FCampaignProgress = {
 }
 
 export type FGlobalEvent = {
+    progress:        number[];
+    expires:         {seconds: number, nanoseconds: number};
+    id:              number;
+    taskDescription: string;
+    flags:           number;
+    overrideTitle:   string;
+    reward:          Reward;
+    type:            number;
+    overrideBrief:   string;
+    tasks:           Task[];
     created: {seconds: number, nanoseconds: number};
     updated: {seconds: number, nanoseconds: number};
-    completed: boolean;
-    completedTitle: string;
-    completedMessage: string
-    eventId: number;
-    title: string;
-    message: string;
-    race: number;
-    flag: number;
-    effectIds: number[]; //Unknown
-    planetIndices: number[]; //Unknown
 }
+

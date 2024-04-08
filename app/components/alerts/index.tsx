@@ -1,6 +1,5 @@
 //"use client"
 "use server"
-
 import React from 'react'
 import { Avatar } from '@nextui-org/react';
 import { Assignment, Reward, Task } from '@/app/types/api/helldivers/assignment_types';
@@ -21,10 +20,13 @@ async function Alert() {
     const alertItems: AlertItem[] = [];
 
 
-    if (assignment.setting.overrideTitle.length != 0 && assignment.setting.overrideBrief.length != 0) {
+    if (assignment != undefined && assignment.setting.overrideTitle.length != 0 && assignment.setting.overrideBrief.length != 0) {
+        let title: string = assignment.setting.overrideTitle.replace(/<\/?[^>]+(>|$)/g, "");
+        let message: string = assignment.setting.overrideBrief.replace(/<\/?[^>]+(>|$)/g, "");
+
         alertItems.push({
-            title: assignment.setting.overrideTitle,
-            message: assignment.setting.overrideBrief,
+            title: title,
+            message: message,
             task: assignment.setting.taskDescription,
             //reward: assignment.setting.reward
         } as AlertItem)
@@ -98,22 +100,26 @@ async function Alert() {
 async function getOrders() {
     let res = await queryAssignmentExternal();
     //TODO: There could be an instance where there are multiple major orders to iterate through
-    res = res[0];
+    
+    if (res.length > 0) {
+        res = res[0];
+        const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
 
-    const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
-
-    for (let i = 0; i < res.setting.tasks.length; i++) {
-        const index = res.setting.tasks[i].values[2]
-        const updatedTasks: Task = {
-            planetIndex: index,
-            planetName: planets[index].name,
-            ...res.setting.tasks[i],
+        for (let i = 0; i < res.setting.tasks.length; i++) {
+            const index = res.setting.tasks[i].values[2]
+            const updatedTasks: Task = {
+                planetIndex: index,
+                planetName: planets[index].name,
+                ...res.setting.tasks[i],
+            }
+    
+            res.setting.tasks[i] = updatedTasks
         }
-
-        res.setting.tasks[i] = updatedTasks
+        return res;
     }
 
-    return res;
+    return undefined;
+    
 }
 
 function getRewardText(reward: Reward) {

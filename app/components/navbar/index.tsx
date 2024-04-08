@@ -1,10 +1,11 @@
 import React from "react";
 import Logo from "./Logo";
 import Button from "./patchNotes";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Image } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Image, Chip } from "@nextui-org/react";
 import { SteamNews } from "@/app/types/api/steam/steam_news_types";
 import './navbar.scss'
 import FirebaseInstance from "@/app/classes/firebase";
+import SiteMessage from "./siteMessage";
 
 async function Navigation() {
   //TODO: need to store in DB and check for new updates. If none exists then use DB version
@@ -12,9 +13,9 @@ async function Navigation() {
   const news: SteamNews = await res_steam_news.json();
 
   const db = new FirebaseInstance();
-  const res_site_message = await db.getSiteMessage() as { SiteMessage: string, timestamp: { seconds: number, nanoseconds: number } };
-  const timestamp = new Date(res_site_message.timestamp.seconds * 1000)
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const res_site_message = await db.getSiteMessage() as { message: string, timestamp: { seconds: number, nanoseconds: number }, expires: { seconds: number, nanoseconds: number } };
+
+
 
   return (
     <>
@@ -53,10 +54,7 @@ async function Navigation() {
 
       </Navbar>
       {(Object.keys(res_site_message).length > 0) ?
-        <div className="fixed z-[50] w-full bg-[#aa2d31]/80 font-bold py-2 px-1">
-          <p className="text-center text-tiny text-gray-300">{timestamp.toLocaleString('en-US', { timeZone: tz })}</p>
-          <p className="text-center text-sm text-gray-200">{res_site_message.SiteMessage}</p>
-        </div>
+        <SiteMessage SiteMessage={res_site_message.message} timestamp={new Date(res_site_message.timestamp.seconds * 1000)} />
         :
         <></>
       }

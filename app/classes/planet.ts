@@ -71,14 +71,14 @@ class Planet {
 
             if (this.waypoints.includes(order.planetIndex)) {
                 this.majorOrderAssociation = MajorOrderAssociation.associated;
-                break
+                continue
             }
 
             //Get waypoints for this task planet id
             const taskWaypoints = apiStatus.info.planetInfos[order.planetIndex].waypoints
             if (taskWaypoints.includes(this.index)) {
                 this.majorOrderAssociation = MajorOrderAssociation.associated
-                break
+                continue
             }
 
             //Get waypoints of all associated planets

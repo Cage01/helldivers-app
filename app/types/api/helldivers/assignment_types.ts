@@ -1,4 +1,5 @@
 export type Assignment = {
+    source:    string,
     id32:      number;
     progress:  number[];
     expiresIn: number;

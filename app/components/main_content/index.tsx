@@ -82,6 +82,13 @@ function MainContent() {
                     tmpSecondary = split[1] as Planet[]
                 }
 
+            } else if (tmpSecondary.length == 0) {
+                let split = splitArrayByIndex(tmpMain, 1)
+                if (split != undefined) {
+                    tmpMain = split[0] as Planet[]
+                    tmpSecondary = split[1] as Planet[]
+                }
+
             }
             setMainObjectives(tmpMain)
             setSecondaryObjectives(tmpSecondary)
