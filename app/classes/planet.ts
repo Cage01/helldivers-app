@@ -3,6 +3,7 @@ import { PlanetInfo } from "@/app/types/api/helldivers/war_info_types";
 import { Assignment } from "../types/api/helldivers/assignment_types";
 import { MajorOrderAssociation } from "./enums";
 import { PlanetsAPI, StatusAPI } from "../types/app_types";
+import { getPlanetEvent } from "../utilities/universal_functions";
 
 class Planet {
     index: number
@@ -25,7 +26,6 @@ class Planet {
     enemyFactionID: number
     enemyFactionName: string = "";
     enemyFactionImage: string = "";
-    assignmentFactionID: number;
 
     majorOrderAssociation: MajorOrderAssociation = MajorOrderAssociation.unrelated;
 
@@ -35,7 +35,6 @@ class Planet {
         this.time = apiStatus.status.time;
         this.index = campaign.planetIndex;
         //TODO: This will need to be updated to be more dynamic
-        this.assignmentFactionID = (majorOrder.setting.overrideBrief.toLowerCase().includes("automaton")) ? 3 : 2
         
 
         if (apiPlanets != undefined) {
@@ -52,9 +51,9 @@ class Planet {
 
 
         //Setting planet specific data
-        this.status = apiStatus.status.planetStatus[this.index]; //this.getPlanetStatus(apiStatus.status);
-        this.info =  apiStatus.info.planetInfos[this.index]; //this.getPlanetInfo(apiStatus.info);
-        this.event = this.getPlanetEvent(apiStatus.status);
+        this.status = apiStatus.status.planetStatus[this.index];
+        this.info =  apiStatus.info.planetInfos[this.index];
+        this.event = getPlanetEvent(this.index, apiStatus.status);
 
 
 
@@ -115,17 +114,6 @@ class Planet {
 
         this.liberation = this.getLiberationPercentage()
 
-    }
-
-    getPlanetEvent(status: GalaxyStatus): PlanetEvent | null {
-        let foundEvent: PlanetEvent | null = null;
-        for (let event of status.planetEvents) {
-            if (event.planetIndex == this.index) {
-                foundEvent = event;
-                break;
-            }
-        }
-        return foundEvent;
     }
 
     getLiberationPercentage(): number {

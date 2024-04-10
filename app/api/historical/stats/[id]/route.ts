@@ -1,4 +1,5 @@
 import FirebaseInstance from "@/app/classes/firebase";
+import { FGlobalEvent } from "@/app/types/firebase_types";
 import moment from "moment";
 
 async function requestHandler(_request: Request): Promise<Response> {
@@ -10,11 +11,11 @@ async function requestHandler(_request: Request): Promise<Response> {
 
     //Get event created time
     const firebase = new FirebaseInstance();
-    let resEvent = await firebase.getGlobalEventByID(id)
+    let resEvent: FGlobalEvent = await firebase.getGlobalEventByID(id)
 
     let created
-    if (resEvent.length > 0) {
-       created = new Date(resEvent[0].data().created.seconds * 1000)
+    if (resEvent != undefined) {
+       created = new Date(resEvent.created.seconds * 1000)
     } else {
         //Major orders have swapped and nothing is currently up
         created = moment().subtract("3", "hours").toDate()

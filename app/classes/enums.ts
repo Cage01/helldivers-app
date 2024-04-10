@@ -4,3 +4,16 @@ export enum MajorOrderAssociation {
     associated = 2,
     mainObjective = 3
 }
+
+export enum MajorOrderType {
+    unknown = -1,
+    liberate = 0,
+    control = 1,
+    defend = 2
+}
+
+export enum EventResult {
+    active = 0,
+    success = 1,
+    failure = 2
+}

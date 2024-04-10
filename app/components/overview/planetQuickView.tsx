@@ -3,24 +3,33 @@ import { fetcher } from '@/app/classes/fetch';
 import Planet from '@/app/classes/planet';
 import { Assignment } from '@/app/types/api/helldivers/assignment_types';
 import { HistoricalAPI, PlanetsAPI, StatusAPI } from '@/app/types/app_types';
-import { getDecayRate, sortPlanets } from '@/app/utilities/client_functions';
+import { getDecayRate, sortPlanets } from '@/app/utilities/universal_functions';
 import { Card, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, CardHeader, CardBody, Image, Divider, CircularProgress, Spinner, CardFooter, Button, Popover, PopoverContent, PopoverTrigger, Tab, Tabs, Chip, Skeleton } from '@nextui-org/react'
 import AnimatedNumber from "animated-number-react";
 import React, { useEffect, useState } from 'react'
 import useSWR from 'swr';
+import CountdownTimer from '../countdown';
+
+
 
 function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) {
 
 
     const [historical, setHistorical] = useState<HistoricalAPI[]>();
     const [activePlanets, setActivePlanets] = useState<Planet[]>([]);
-    const apiStatus: StatusAPI = useSWR("/api/status", fetcher, { refreshInterval: 20000 }).data;
-    const apiPlanets: PlanetsAPI[] = useSWR("/api/planets", fetcher, { refreshInterval: 20000 }).data;
+    const [victoryMap, setVictoryMap] = useState<Map<number, number>>();
+    const [totalPlayers, setTotalPlayers] = useState(0);
+    const apiStatus: StatusAPI = (useSWR("/api/status", fetcher, { refreshInterval: 20000 })).data;
+    const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
 
-    const apiHistorical: HistoricalAPI[] = useSWR("/api/historical?hours=1", fetcher, { refreshInterval: 60000 }).data
+    const apiHistorical: HistoricalAPI[] = (useSWR("/api/historical?hours=1", fetcher, { refreshInterval: 60000 })).data
+    const majorOrder: Assignment = (useSWR("/api/status/orders", fetcher, { refreshInterval: 20000 })).data;
 
     useEffect(() => {
-        if (apiStatus != undefined && apiPlanets != undefined && props.majorOrder != undefined) {
+        if (apiStatus != undefined && apiPlanets != undefined && props.majorOrder != undefined && apiHistorical != undefined && majorOrder != undefined) {
+            setHistorical(apiHistorical)
+
+            let tmpMap = new Map<number, number>();
             let tmpPlanets: Planet[] = []
             for (let i = 0; i < apiStatus.status.campaigns.length; i++) {
 
@@ -30,12 +39,27 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
                 let p = new Planet(props.majorOrder, campaign, apiStatus, apiPlanets);
                 tmpPlanets.push(p)
 
+                //Update prediction
+                const tmpDecay = getDecayRate(p.maxHealth, p.status.regenPerSecond, p.hasEvent, apiHistorical.find(h => h.campaignId == p.campaign.id)?.progress)
+                let prd = Math.ceil(Math.max(((100 - p.liberation) / tmpDecay), 0) * 60 * 60) + apiStatus.status.time
+                tmpMap.set(p.index, prd);
             }
 
-            sortPlanets(tmpPlanets, true)
+
+            setVictoryMap(tmpMap);
+
+            sortPlanets(majorOrder, tmpPlanets, true)
             setActivePlanets(tmpPlanets)
+
+            let playerCount = 0;
+            apiStatus.status.planetStatus.forEach(element => {
+                playerCount += element.players;
+            });
+            setTotalPlayers(playerCount)
         }
-    }, [apiStatus, apiPlanets, props.majorOrder]);
+
+
+    }, [apiStatus, apiPlanets, props.majorOrder, apiHistorical, majorOrder]);
 
     useEffect(() => {
         if (apiHistorical != undefined) {
@@ -47,10 +71,18 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
     const [isContentVisible, setContentVisible] = useState(false);
 
 
-    const formatValue = (value: number) => {
-        return ((value > 0) ? "+" : "") + value.toLocaleString("en", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + "% /h"
+    const formatValueDecay = (value: number) => {
+        return ((value > 0) ? "+" : "") + value.toLocaleString("en", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + "%"
     };
 
+
+    const formatValue = (value: number) => {
+        return value.toLocaleString('en', { useGrouping: true, maximumFractionDigits: 0, minimumFractionDigits: 0 })
+    };
+
+    const formatPlayerPercent = (value: number) => {
+        return "(" + ((value / totalPlayers) * 100).toLocaleString('en', { maximumFractionDigits: 0 }) + "%)"
+    }
 
     return (
         <div className={(props.className != undefined) ? props.className : ""}>
@@ -69,31 +101,93 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
 
                     {/* <Tabs key={1} variant={"underlined"} aria-label="Tabs PlanetView"> */}
                     {/* <Tab className='w-full' key="pl" title="Live"> */}
-                    <Table aria-label="planet_quick_view">
+                    <Table aria-label="planet_quick_view" className='w-full'>
                         <TableHeader>
                             <TableColumn>Planet</TableColumn>
-                            <TableColumn>Type</TableColumn>
-                            <TableColumn>Hourly</TableColumn>
                             <TableColumn>Liberation</TableColumn>
+                            <TableColumn>Hourly</TableColumn>
+                            <TableColumn>Players</TableColumn>
+                            <TableColumn>Victory</TableColumn>
                         </TableHeader>
                         <TableBody emptyContent={"No rows to display."}>
 
                             {activePlanets.map(planet =>
                                 <TableRow onClick={() => setContentVisible(!isContentVisible)} key={planet.index}>
                                     <TableCell>
-                                        <>
-                                            <Image src={planet.enemyFactionImage}
-                                                width={20}
-                                                className='absolute'
-                                            />
+                                        <div className='flex'>
+                                            <div className='min-h-[20px] min-w-[20px] max-w-[20px] w-[20px] flex-grow float-left'>
+                                                <Image src={planet.enemyFactionImage}
+                                                    width={20}
+                                                />
+                                            </div>
 
-                                            <p className='pl-6'>{planet.name}</p>
-                                        </>
+                                            <div className='min-h-[20px] min-w-[20px] max-w-[20px] w-[20px] flex-grow float-left'>
+                                                {(planet.hasEvent) ?
+                                                    <Image src='/images/shield.svg'
+                                                        width={20}
+                                                    />
+                                                    :
+                                                    <Image src='/images/swords.svg'
+                                                        width={20} />
 
+                                                }
+                                            </div>
+
+
+                                            <span className='pl-2 flex-grow'>{planet.name}</span>
+
+                                        </div>
 
                                     </TableCell>
                                     <TableCell>
-                                        {(planet.hasEvent) ?
+                                        <CircularProgress
+                                            aria-label={planet.name}
+                                            size="lg"
+                                            value={Number(planet.liberation.toFixed(2))}
+                                            color="warning"
+                                            formatOptions={{ style: "unit", unit: "percent" }}
+                                            showValueLabel={true}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+
+                                        <p className='text-xs'>
+                                            {(historical != undefined) ?
+                                                <AnimatedNumber aria-label="regen"
+
+                                                    value={
+                                                        getDecayRate(planet.maxHealth, planet.status.regenPerSecond, planet.hasEvent, historical.find(h => h.campaignId == planet.campaign.id)?.progress)
+                                                    }
+                                                    className={
+                                                        ((getDecayRate(planet.maxHealth, planet.status.regenPerSecond, planet.hasEvent, historical.find(h => h.campaignId == planet.campaign.id)?.progress) > 0) ? "text-green-400/80" : "text-red-400/80")
+                                                    }
+                                                    formatValue={formatValueDecay} duration={1100} />
+                                                :
+                                                <Skeleton className='h-full w-full'></Skeleton>
+                                            }
+
+                                        </p>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className='flex'>
+                                            <span className='text-xs float-left font-bold'>
+                                                <AnimatedNumber
+                                                    aria-label="playerCount_qv"
+                                                    value={planet.playerCount}
+                                                    formatValue={formatValue}
+                                                    duration={1100}
+                                                />
+                                            </span>
+                                            <span className='text-xs flex-grow pl-2 '>
+                                                <AnimatedNumber
+                                                    aria-label="playerPercent_qv"
+                                                    value={planet.playerCount}
+                                                    formatValue={formatPlayerPercent}
+                                                    duration={1100}
+                                                />
+                                            </span>
+                                        </div>
+                                        {/* {(planet.hasEvent) ?
                                             <>
                                                 <Image src='/images/shield.svg'
                                                     width={20}
@@ -109,37 +203,17 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
                                                     className='absolute' />
                                                 <p className='pl-6'>Liberation</p>
                                             </>
-                                        }
+                                        } */}
                                     </TableCell>
                                     <TableCell>
-
-                                        <p className='text-xs'>
-                                            {(historical != undefined) ?
-                                                <AnimatedNumber aria-label="regen"
-                                                    
-                                                    value={
-                                                        getDecayRate(planet.maxHealth, planet.status.regenPerSecond, planet.hasEvent, historical.find(h => h.campaignId == planet.campaign.id)?.progress)
-                                                    }
-                                                    className={
-                                                        ((getDecayRate(planet.maxHealth, planet.status.regenPerSecond, planet.hasEvent, historical.find(h => h.campaignId == planet.campaign.id)?.progress) > 0) ? "text-green-400/80" : "text-red-400/80")                                                     
-                                                    }
-                                                    formatValue={formatValue} duration={1100} />
-                                                :
-                                                <Skeleton className='h-full w-full'></Skeleton>
-                                            }
-
-                                        </p>
+                                        <CountdownTimer className='text-tiny flex'
+                                            classNames={{
+                                                span: "flex-grow pr-[2px]"
+                                            }}
+                                            currentTime={apiStatus.status.time}
+                                            endTime={victoryMap?.get(planet.index)} />
                                     </TableCell>
-                                    <TableCell>
-                                        <CircularProgress
-                                            aria-label={planet.name}
-                                            size="lg"
-                                            value={Number(planet.liberation.toFixed(2))}
-                                            color="warning"
-                                            formatOptions={{ style: "unit", unit: "percent" }}
-                                            showValueLabel={true}
-                                        />
-                                    </TableCell>
+
                                 </TableRow>
 
                             )}

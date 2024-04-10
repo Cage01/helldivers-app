@@ -1,32 +1,36 @@
+import { MajorOrderType } from "@/app/classes/enums";
+
 export type Assignment = {
-    source:    string,
-    id32:      number;
-    progress:  number[];
+    source: string,
+    determinedType: MajorOrderType;
+    enemyID: number,
+    id32: number;
+    progress: number[];
     expiresIn: number;
-    setting:   Setting;
+    setting: Setting;
 }
 
 export type Setting = {
-    type:            number;
-    overrideTitle:   string;
-    overrideBrief:   string;
+    type: number;
+    overrideTitle: string;
+    overrideBrief: string;
     taskDescription: string;
-    tasks:           Task[];
-    reward:          Reward;
-    flags:           number;
+    tasks: Task[];
+    reward: Reward;
+    flags: number;
 }
 
 export type Reward = {
-    type:   number;
-    id32:   number;
+    type: number;
+    id32: number;
     amount: number;
 }
 
 export type Task = {
     planetIndex: number,
     planetName: string,
-    type:       number;
-    values:     number[];
+    type: number;
+    values: number[];
     valueTypes: number[];
 }
 

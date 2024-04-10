@@ -1,15 +1,17 @@
 "use client"
 import { fetcher } from '@/app/classes/fetch';
-import { PlanetStatus } from '@/app/types/api/helldivers/galaxy_status_types';
 import { StatusAPI } from '@/app/types/app_types';
 import React, { useEffect, useState } from 'react'
 import AnimatedNumber from "animated-number-react";
 
 import useSWR from 'swr';
+import { getTotalCount } from '@/app/utilities/universal_functions';
+
 
 function PlayerCount() {
 
-    const apiStatus: StatusAPI = useSWR("/api/status", fetcher, { refreshInterval: 20000 }).data;
+    
+    const apiStatus: StatusAPI = (useSWR("/api/status", fetcher, { refreshInterval: 20000 })).data;
     const [playerCount, setPlayerCount] = useState(0);
 
 
@@ -39,13 +41,6 @@ function PlayerCount() {
     )
 }
 
-function getTotalCount(planets: PlanetStatus[]) {
-    let total = 0;
-    planets.forEach(element => {
-        total += element.players;
-    });
 
-    return total;
-}
 
 export default PlayerCount

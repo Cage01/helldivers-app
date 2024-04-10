@@ -1,4 +1,5 @@
 import FirebaseInstance from "@/app/classes/firebase";
+import { FGlobalEvent } from "@/app/types/firebase_types";
 
 
 async function requestHandler(_request: Request): Promise<Response> {
@@ -10,9 +11,12 @@ async function requestHandler(_request: Request): Promise<Response> {
     //console.log(startTime)
     if (startTime == 0) {
         let globalEventId: number = Number(params.searchParams.get("globalEventId"))
-        let resEvent = await firebase.getGlobalEventByID(globalEventId)
+        let resEvent: FGlobalEvent = await firebase.getGlobalEventByID(globalEventId)
 
-        startTime = resEvent[0].data().created.seconds * 1000
+        if (resEvent != undefined) {
+            startTime = resEvent.created.seconds * 1000
+        }
+        
         //console.log(startTime)
     }
 

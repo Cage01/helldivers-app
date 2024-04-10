@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, query, collection, orderBy, getDocs, where, doc, getDoc, collectionGroup, and, limit, onSnapshot, QuerySnapshot } from "firebase/firestore";
 import { FCampaignProgress, FGlobalEvent } from "../types/firebase_types";
+import { EventResult } from "./enums";
 
 
 
@@ -74,11 +75,11 @@ export default class FirebaseInstance {
     }
 
     async getGlobalEventByID(id: number) {
-        const q = query(collectionGroup(this.db, "GlobalEvents"), where("id", "==", id));
+        const q = query(collectionGroup(this.db, "GlobalEvents"), where("id", "==", id), limit(1));
 
         const eventSnapshot = await getDocs(q);
         // eventSnapshot.metadata
-        return eventSnapshot.docs;
+        return eventSnapshot.docs[0].data() as FGlobalEvent;
     }
 
     async getSiteMessage() {
@@ -97,6 +98,13 @@ export default class FirebaseInstance {
 
         return {}
         
+    }
+
+    async getSuccessfulDefenseCampaigns(from: Date, to: Date) {
+        const q = query(collectionGroup(this.db, "Events"), where("updated", ">=", from), where("updated", "<=", to), where("resultFlag", "==", EventResult.success))
+        const snapshot = await getDocs(q);
+        
+        return snapshot.docs;
     }
 
     async getGalaxyStats(fromDate: Date) {

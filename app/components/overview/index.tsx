@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import MajorOrderCard from './majorOrder'
 import GalaxyStatsCard from './galaxyStats'
 import PlanetQuickView from './planetQuickView'
-import { Accordion, AccordionItem, Spinner } from '@nextui-org/react'
+import { Spinner } from '@nextui-org/react'
 import useSWR from 'swr'
 import { fetcher } from '@/app/classes/fetch'
 import { Assignment } from '@/app/types/api/helldivers/assignment_types'
@@ -15,7 +15,7 @@ const timeAgo = moment().subtract(24, 'hour').toDate().getTime()
 function Overview() {
 
     const [assignment, setAssignment] = useState<Assignment>()
-    const majorOrder = useSWR("/api/status/orders", fetcher, { refreshInterval: 20000 }).data;
+    const majorOrder = (useSWR("/api/status/orders", fetcher, { refreshInterval: 20000 })).data;
     const [time, setTime] = useState(timeAgo);
     //console.log(majorOrder);
 
@@ -41,9 +41,9 @@ function Overview() {
 
                 {(assignment != undefined) ?
                     <>
-                        <GalaxyStatsCard time={time} majorOrder={assignment} className='w-[27rem]' />
+                        <PlanetQuickView majorOrder={assignment} className='smphone:w-full sm:w-[35rem] smphone:overflow-x-scroll sm:overflow-hidden' />
                         <MajorOrderCard majorOrder={assignment} className='w-[35rem]' />
-                        <PlanetQuickView majorOrder={assignment} className='w-[27rem]' />
+                        <GalaxyStatsCard time={time} majorOrder={assignment} className='w-[35rem]' />
                     </>
                     : <Spinner color='default' />}
 

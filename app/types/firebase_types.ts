@@ -1,3 +1,4 @@
+import { MajorOrderType } from "../classes/enums";
 import { Reward, Task } from "./api/helldivers/assignment_types";
 
 export type FCampaignProgress = {
@@ -12,7 +13,9 @@ export type FCampaignProgress = {
 
 export type FGlobalEvent = {
     progress:        number[];
-    expires:         {seconds: number, nanoseconds: number};
+    determinedType:  MajorOrderType;
+    enemyID:         number;
+    expires:         FTimestamp
     id:              number;
     taskDescription: string;
     flags:           number;
@@ -21,7 +24,28 @@ export type FGlobalEvent = {
     type:            number;
     overrideBrief:   string;
     tasks:           Task[];
-    created: {seconds: number, nanoseconds: number};
-    updated: {seconds: number, nanoseconds: number};
+    created: FTimestamp
+    updated: FTimestamp
+}
+
+export type FPlanetEvent = {
+    campaignCount:     number;
+    campaignId:        number;
+    created:           FTimestamp;
+    eventType:         number;
+    expireDate:        FTimestamp;
+    expireTime:        number;
+    id:                number;
+    jointOperationIds: number[];
+    planetIndex:       number;
+    race:              number;
+    resultFlag:        number;
+    startTime:         number;
+    updated:           FTimestamp;
+}
+
+export type FTimestamp = {
+    seconds: number,
+    nanoseconds: number
 }
 

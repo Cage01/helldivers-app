@@ -1,9 +1,9 @@
 import FirebaseInstance from "@/app/classes/firebase";
 import { HistoricalAPI, StatusAPI } from "@/app/types/app_types";
-import { queryExternal } from "@/app/utilities/server_functions";
+import { queryStatusExternal } from "@/app/utilities/server_functions";
 import moment from "moment";
 
-
+//TODO: This shouldnt need both planetID and campaignID. Only campaignID should be necessary
 async function requestHandler(_request: Request): Promise<Response> {
     let params = new URL(_request.url)
     let planetID: number = Number(params.searchParams.get("planetID"))
@@ -15,7 +15,7 @@ async function requestHandler(_request: Request): Promise<Response> {
 
     let progress: HistoricalAPI[] = [];
     if (planetID == 0 || campaignID == 0) {
-        let status: StatusAPI | undefined = await queryExternal();
+        let status: StatusAPI | undefined = await queryStatusExternal();
         if (status != undefined) {
             for (let i = 0; i < status.status.campaigns.length; i++) {
                 let element = status.status.campaigns[i]

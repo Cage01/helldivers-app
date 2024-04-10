@@ -8,16 +8,16 @@ import { fetcher } from '@/app/classes/fetch'
 import Planet from '@/app/classes/planet'
 import { Assignment } from '@/app/types/api/helldivers/assignment_types'
 import { PlanetsAPI, StatusAPI } from '@/app/types/app_types'
-import { sortPlanets } from '@/app/utilities/client_functions'
+import { sortPlanets } from '@/app/utilities/universal_functions'
 import useSWR from 'swr'
 
 function MainContent() {
     const [mainObjectives, setMainObjectives] = useState<Planet[]>();
     const [secondaryObjectives, setSecondaryObjectives] = useState<Planet[]>();
 
-    const apiPlanets: PlanetsAPI[] = useSWR("/api/planets", fetcher, { refreshInterval: 20000 }).data;
-    const apiStatus: StatusAPI = useSWR("/api/status", fetcher, { refreshInterval: 20000 }).data;
-    const majorOrder: Assignment = useSWR("/api/status/orders", fetcher, { refreshInterval: 1800000 }).data;
+    const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
+    const apiStatus: StatusAPI = (useSWR("/api/status", fetcher, { refreshInterval: 20000 })).data;
+    const majorOrder: Assignment = (useSWR("/api/status/orders", fetcher, { refreshInterval: 1800000 })).data;
 
 
 
@@ -45,7 +45,7 @@ function MainContent() {
 
 
             }
-            sortPlanets(allPlanets, true);
+            sortPlanets(majorOrder, allPlanets, true);
 
             allPlanets.forEach((planet, index) => {
                 if (planet.majorOrderAssociation == MajorOrderAssociation.mainObjective) {
@@ -71,8 +71,8 @@ function MainContent() {
                 // }
             });
 
-            sortPlanets(tmpMain, true);
-            sortPlanets(tmpSecondary, true);
+            sortPlanets(majorOrder, tmpMain, true);
+            sortPlanets(majorOrder, tmpSecondary, true);
             //console.log(tmpSecondary)
 
             if (tmpMain.length == 0) {

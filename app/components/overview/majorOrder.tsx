@@ -2,7 +2,7 @@
 import { Card, CardHeader, Divider, CardBody, Checkbox, Image, Spinner, Tooltip } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 import CountdownTimer from '../countdown'
-import { Assignment, Task } from '@/app/types/api/helldivers/assignment_types'
+import { Assignment } from '@/app/types/api/helldivers/assignment_types'
 import { fetcher } from '@/app/classes/fetch'
 import useSWR from 'swr'
 import { Campaign } from '@/app/types/api/helldivers/galaxy_status_types'
@@ -10,45 +10,53 @@ import AnimatedNumber from "animated-number-react";
 import moment from 'moment'
 import MajorOrderStats from './majorOrderStats'
 import Planet from '@/app/classes/planet'
-import { MajorOrderAssociation } from '@/app/classes/enums'
-import { StatusAPI } from '@/app/types/app_types'
+import { MajorOrderAssociation, MajorOrderType } from '@/app/classes/enums'
+import { PlanetEventAPI, PlanetsAPI, StatusAPI } from '@/app/types/app_types'
+import { FPlanetEvent } from '@/app/types/firebase_types'
 
+interface Defense {
+    name: string,
+    completed: boolean
+}
 
 function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
 
     const [assignment, setAssignment] = useState<Assignment>()
     const [endtime, setEndtime] = useState(0);
     const [warState, setWarState] = useState<StatusAPI>();
-    const [playerCount, setPlayerCount] = useState(0)
-    const apiStatus: StatusAPI = useSWR("/api/status", fetcher, { refreshInterval: 20000 }).data;
+    const [playerCount, setPlayerCount] = useState(0);
+    const [planets, setPlanets] = useState<Planet[]>();
+    const [defenseTracker, setDefenseTracker] = useState<Defense[]>()
+    // console.log(defenseTracker)
 
+    const apiStatus: StatusAPI = (useSWR("/api/status", fetcher, { refreshInterval: 20000 })).data;
+    const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
+
+    const defenseProgress: PlanetEventAPI[] = useSWR((props.majorOrder.determinedType == MajorOrderType.defend) ? "/api/status/orders/defenseProgress?eventId=" + props.majorOrder.id32 : null, fetcher, { refreshInterval: 30000 }).data
+    // console.log(props.majorOrder.determinedType)
+    // console.log("Assignment enemy: " + props.majorOrder.enemyID)
+    
     //console.log(endtime)
     useEffect(() => {
 
         //TODO: this can come in as an array, so should build something to deal with that
-        if (props.majorOrder != undefined && apiStatus != undefined) {
+        if (props.majorOrder != undefined && apiStatus != undefined && apiPlanets != undefined) {
             setWarState(apiStatus)
             setAssignment(props.majorOrder)
 
 
-            let assignmentEnemy = 0
-            if (props.majorOrder.setting.overrideBrief.toLowerCase().includes("automaton")) {
-                assignmentEnemy = 3
-            } else if (props.majorOrder.setting.overrideBrief.toLowerCase().includes("terminid")) {
-                assignmentEnemy = 2
-            }
 
             let count = 0;
-
             let allPlanets: Planet[] = [];
             apiStatus.status.campaigns.forEach((campaign: Campaign) => {
-                let p = new Planet(props.majorOrder, campaign, apiStatus)
+                let p = new Planet(props.majorOrder, campaign, apiStatus, apiPlanets)
                 allPlanets.push(p)
             });
 
             allPlanets.forEach((planet: Planet) => {
+                // console.log(planet)
 
-                if (planet.majorOrderAssociation == MajorOrderAssociation.mainObjective || (planet.hasEvent && planet.enemyFactionID == assignmentEnemy)) {
+                if (planet.majorOrderAssociation == MajorOrderAssociation.mainObjective || (planet.hasEvent && planet.enemyFactionID == props.majorOrder.enemyID)) {
                     count += planet.playerCount;
                 } else if (planet.majorOrderAssociation == MajorOrderAssociation.associated
                     && !allPlanets.some((e) => e.majorOrderAssociation == MajorOrderAssociation.mainObjective)) {
@@ -58,12 +66,15 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
                     && (!allPlanets.some((e) => e.majorOrderAssociation >= MajorOrderAssociation.associated))) {
 
                     count += planet.playerCount;
+                } else if (props.majorOrder.determinedType == MajorOrderType.defend && planet.hasEvent && planet.enemyFactionID == props.majorOrder.enemyID) {
+                    count += planet.playerCount
                 }
 
 
             });
 
             setPlayerCount(count)
+            setPlanets(allPlanets)
 
             if (endtime == 0) {
                 setEndtime(moment().add(props.majorOrder.expiresIn, "seconds").toDate().getTime())
@@ -71,7 +82,28 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
 
         }
 
-    }, [props.majorOrder, apiStatus])
+    }, [props.majorOrder, apiStatus, apiPlanets])
+
+    useEffect(() => {
+        if (defenseProgress != undefined && planets != undefined && planets.length > 0) {
+            //Everything pulled from the database is a successful defense during the timeframe of this Order
+            const tmpDefenses: Defense[] = []
+            for (let i = 0; i < defenseProgress.length; i++) {
+                tmpDefenses.push({ name: defenseProgress[i].planetName, completed: true })
+            }
+
+            //Every defense campaign currently active has not been successful yet (obviously)
+            for (let i = 0; i < planets.length; i++) {
+                if (planets[i].hasEvent) {
+                    tmpDefenses.push({ name: planets[i].name, completed: false })
+                }
+                
+            }
+
+            setDefenseTracker(tmpDefenses)
+        }
+    }, [defenseProgress, planets])
+
 
     const formatValue = (value: number) => {
         return value.toLocaleString("en", { maximumFractionDigits: 0, useGrouping: true })
@@ -109,9 +141,19 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
                             <p className='text-center text-sm font-bold text-gray-300'>{assignment.setting.taskDescription}</p>
 
                             <div className="grid grid-cols-2 gap-4 mt-4 px-3 py-3 w-full" style={{ backgroundColor: "#0c0c0d", borderRadius: "10px" }}>
-                                {assignment.setting.tasks.map((task, index) => (
+                                {(defenseTracker != undefined && props.majorOrder.determinedType == MajorOrderType.defend) ?
+                                    
+                                    defenseTracker.map((campaign) => (
+                                        <Checkbox key={campaign.name} isSelected={campaign.completed} isReadOnly={true} icon={<Image src='/images/helldivers_skull.svg' />}>{campaign.name}</Checkbox>
+                                    ))
+                                    :
+                                    assignment.setting.tasks.map((task, index) => (
+                                        <Checkbox key={task.planetName} isSelected={(assignment.progress[index] == 0) ? false : true} isReadOnly={true} icon={<Image src='/images/helldivers_skull.svg' />}>{task.planetName}</Checkbox>
+                                    ))
+                                }
+                                {/* {assignment.setting.tasks.map((task, index) => (
                                     <Checkbox key={task.planetName} isSelected={(assignment.progress[index] == 0) ? false : true} isReadOnly={true} icon={<Image src='/images/helldivers_skull.svg' />}>{task.planetName}</Checkbox>
-                                ))}
+                                ))} */}
 
 
                             </div>

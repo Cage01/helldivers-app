@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter, Underdog } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/navbar";
 import { Providers } from "./providers";

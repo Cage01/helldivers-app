@@ -1,5 +1,3 @@
-import { queryExternal, getRandomPlanetImage } from "@/app/utilities/server_functions";
-import { getPlanetStatus, getPlanetInfo, getPlanetEvent } from "@/app/utilities/client_functions";
 import path from "path";
 import fs from 'fs';
 

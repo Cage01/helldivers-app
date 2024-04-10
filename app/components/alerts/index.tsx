@@ -1,11 +1,8 @@
-//"use client"
 "use server"
 import React from 'react'
 import { Avatar } from '@nextui-org/react';
-import { Assignment, Reward, Task } from '@/app/types/api/helldivers/assignment_types';
+import { Assignment, Reward } from '@/app/types/api/helldivers/assignment_types';
 import { queryAssignmentExternal, queryNewsFeedExternal } from '@/app/utilities/server_functions';
-import path from 'path';
-import fs from 'fs';
 import AlertCarousel from './carousel';
 import { NewsFeed } from '@/app/types/api/helldivers/news_feed_types';
 import { AlertItem } from '@/app/types/app_types';
@@ -15,12 +12,12 @@ import './alerts.css';
 //TODO: This should probably run on the server
 async function Alert() {
 
-    const assignment: Assignment = await getOrders();
+    const assignment: Assignment = await queryAssignmentExternal();
     const feed: NewsFeed[] = await queryNewsFeedExternal();
     const alertItems: AlertItem[] = [];
 
 
-    if (assignment != undefined && assignment.setting.overrideTitle.length != 0 && assignment.setting.overrideBrief.length != 0) {
+    if (assignment != undefined && assignment.setting != undefined && assignment.setting.overrideTitle != undefined && assignment.setting.overrideBrief != undefined) {
         let title: string = assignment.setting.overrideTitle.replace(/<\/?[^>]+(>|$)/g, "");
         let message: string = assignment.setting.overrideBrief.replace(/<\/?[^>]+(>|$)/g, "");
 
@@ -97,30 +94,6 @@ async function Alert() {
     )
 }
 
-async function getOrders() {
-    let res = await queryAssignmentExternal();
-    //TODO: There could be an instance where there are multiple major orders to iterate through
-    
-    if (res.length > 0) {
-        res = res[0];
-        const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
-
-        for (let i = 0; i < res.setting.tasks.length; i++) {
-            const index = res.setting.tasks[i].values[2]
-            const updatedTasks: Task = {
-                planetIndex: index,
-                planetName: planets[index].name,
-                ...res.setting.tasks[i],
-            }
-    
-            res.setting.tasks[i] = updatedTasks
-        }
-        return res;
-    }
-
-    return undefined;
-    
-}
 
 function getRewardText(reward: Reward) {
     let result = reward.amount.toString();
