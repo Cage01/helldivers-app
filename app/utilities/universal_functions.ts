@@ -1,34 +1,9 @@
 import { GalaxyStatus, PlanetEvent, PlanetStatus } from "../types/api/helldivers/galaxy_status_types";
-import { WarInfo, PlanetInfo } from "../types/api/helldivers/war_info_types";
 import Planet from "../classes/planet";
-import { MajorOrderAssociation } from "../classes/enums";
+import { MajorOrderAssociation, MajorOrderType } from "../classes/enums";
 import { FCampaignProgress } from "../types/firebase_types";
-
-export function getPlanetStatus(index: number, status: GalaxyStatus): PlanetStatus {
-    var planet: PlanetStatus = status.planetStatus[0]
-
-    for (var i = 0; i < status.planetStatus.length; i++) {
-        if (status.planetStatus[i].index == index) {
-            planet = status.planetStatus[i];
-            break;
-        }
-    }
-
-    return planet;
-}
-
-export function getPlanetInfo(index: number, warInfo: WarInfo): PlanetInfo {
-    var planet: PlanetInfo = warInfo.planetInfos[0];
-
-    for (var i = 0; i < warInfo.planetInfos.length; i++) {
-        if (warInfo.planetInfos[i].index == index) {
-            planet = warInfo.planetInfos[i];
-            break;
-        }
-    }
-
-    return planet;
-}
+import { StatusAPI } from "../types/app_types";
+import { Assignment } from "../types/api/helldivers/assignment_types";
 
 export function getPlanetEvent(index: number, status: GalaxyStatus): PlanetEvent | null {
     var foundEvent: PlanetEvent | null = null;
@@ -42,7 +17,7 @@ export function getPlanetEvent(index: number, status: GalaxyStatus): PlanetEvent
 }
 
 const max = 1000
-export function sortPlanets(planets: Planet[], sortByPercentage: boolean = false, index: number = 0, tier: number = 1) {
+export function sortPlanets(assignment: Assignment, planets: Planet[], sortByPercentage: boolean = false, index: number = 0, tier: number = 1) {
     // console.log(tier)
     //console.log(index)
     if (index < planets.length) {
@@ -54,13 +29,16 @@ export function sortPlanets(planets: Planet[], sortByPercentage: boolean = false
             let num = -1;
             if (sortByPercentage) {
                 if (tier == 1) {
-                    if (planets[i].majorOrderAssociation == MajorOrderAssociation.mainObjective) {
+                    if (planets[i].majorOrderAssociation == MajorOrderAssociation.mainObjective 
+                        || (assignment.determinedType == MajorOrderType.defend && planets[i].enemyFactionID == assignment.enemyID)) {
+                        //console.log("Name: " + planets[i].name + " - ID: " + planets[i].index + " - level: " + planets[i].majorOrderAssociation + " - PlanetEnemy: " + planets[i].enemyFactionID + " - AssignmentEnemy: " + assignment.enemyID)
+
                         num = max + planets[i].liberation
                     } else if (planets[i].majorOrderAssociation == MajorOrderAssociation.associated && planets[i].hasEvent) {
                         num = max - 100 + planets[i].liberation
                     } else if (planets[i].majorOrderAssociation == MajorOrderAssociation.associated && !planets[i].hasEvent) {
                         num = max - 105 + planets[i].liberation
-                    } else if (planets[i].hasEvent && planets[i].enemyFactionID == planets[i].assignmentFactionID) {
+                    } else if (planets[i].hasEvent && planets[i].enemyFactionID == assignment.enemyID) {
                         num = max - 105 + planets[i].liberation
                     } else if (planets[i].majorOrderAssociation == MajorOrderAssociation.tertiary) {
                         num = max - 150 + planets[i].liberation
@@ -69,10 +47,11 @@ export function sortPlanets(planets: Planet[], sortByPercentage: boolean = false
                     } else {
                         num = planets[i].liberation;
                     }
+                    //console.log(planets[i].name + " " + num)
                 } else {
                     
                     num = planets[i].liberation
-                    //console.log(planets[i].name + " " + num)
+
                 }
 
 
@@ -80,7 +59,6 @@ export function sortPlanets(planets: Planet[], sortByPercentage: boolean = false
                 num = planets[i].enemyFactionID
             }
 
-            //console.log(planets[i].name + " " + num)
             //const num = (sortByPercentage) ? planets[i].liberation : planets[i].enemyFactionID;
             if (num > highestNum) {
                 highestNum = num;
@@ -99,12 +77,28 @@ export function sortPlanets(planets: Planet[], sortByPercentage: boolean = false
         }
 
         index += 1
-        sortPlanets(planets, sortByPercentage, index, tier)
+        sortPlanets(assignment, planets, sortByPercentage, index, tier)
     }
 
 
     return planets;
 }
+
+export function getPlanetEnemyID(planetIndex: number, apiStatus: StatusAPI ) {
+    let enemyFactionID = 0;
+    let status = apiStatus.status.planetStatus[planetIndex];
+    let info =  apiStatus.info.planetInfos[planetIndex];
+    let event = getPlanetEvent(planetIndex, apiStatus.status);
+    
+    if (event == null){
+        enemyFactionID = (status.owner > 1) ? status.owner : info.initialOwner;
+    } else {
+        enemyFactionID = event.race;
+    }
+
+    return enemyFactionID;
+}
+
 
 
 export function getDecayRate(maxHealth: number, regenRate: number, hasEvent: boolean, history?: FCampaignProgress[]) {
@@ -140,6 +134,15 @@ export function getDecayRate(maxHealth: number, regenRate: number, hasEvent: boo
 
     return 0;
   }
+
+export function getTotalCount(planets: PlanetStatus[]) {
+    let total = 0;
+    planets.forEach(element => {
+        total += element.players;
+    });
+
+    return total;
+}
 // export function getRealtimeExpiration(currentServerTime: number, endServerTime: number) {
 //     let delta = moment().add((endServerTime - currentServerTime), 'seconds').toDate().getTime()
     
