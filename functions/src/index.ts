@@ -13,6 +13,15 @@ enum Results {
     failure = 2
 }
 
+enum MajorOrderType {
+    unknown = -1,
+    liberate = 0,
+    control = 1,
+    defend = 2
+}
+
+
+
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
     authDomain: process.env.AUTH_DOMAIN,
@@ -196,6 +205,7 @@ async function writeToDB() {
                     eventType: event.eventType,
                     startTime: event.startTime,
                     expireTime: event.expireTime,
+                    expireDate: timeToDate(event.expireTime),
                     jointOperationIds: event.jointOperationIds,
                     resultFlag: Results.active, // 0 = Undefined | 1 = Success | 2 = Failure
                 })
@@ -226,6 +236,7 @@ async function writeToDB() {
                 await setDoc(docRef, {
                     id: element.id32,
                     expires: expiration,
+                    determinedType: determineAssignmentType(element),
                     progress: element.progress,
                     created: new Date(),
                     updated: new Date(),
@@ -451,6 +462,36 @@ async function checkDBGlobalEvent(assignmentData: any[]) {
         }
     });
 }
+
+const urlTime: string = 'https://api.live.prod.thehelldiversgame.com/api/WarSeason/801/WarTime';
+async function timeToDate(time: number) {
+    const resInfo = await axios.get(urlTime);
+    const serverTime: {time: number} = resInfo.data;
+
+    let delta = serverTime.time - time;
+
+    return moment().subtract(delta, 'seconds').toDate();
+}
+
+function determineAssignmentType(assignment: { setting: { taskDescription: string; }; }) {
+    let type = MajorOrderType.unknown;
+  
+    if (assignment.setting.taskDescription.split(" ")[0] == "Liberate") {
+      type = MajorOrderType.liberate
+    }
+    else if (assignment.setting.taskDescription.includes("Designated planets must be under Super Earth control when order expires")) {
+      type = MajorOrderType.control
+    } else if (assignment.setting.taskDescription.toLowerCase().includes("defense") || assignment.setting.taskDescription.toLowerCase().includes("defend")) {
+      type = MajorOrderType.defend
+    }
+  
+    return type;
+  }
+
+
+
+/* ================================================================== */
+
 
 export default writeToDB;
 
