@@ -7,13 +7,12 @@ import { PlanetsAPI, StatusAPI } from '@/app/types/app_types';
 import Planet from '@/app/classes/planet';
 
 
-
-function SectorChart(props: { warData?: StatusAPI }) {
+function SectorChart() {
     const [planets, setPlanets] = useState<Planet[]>();
 
-    const apiPlanets: PlanetsAPI[] = useSWR("/api/planets", fetcher, { refreshInterval: 20000 }).data;
-    const apiStatus: StatusAPI = useSWR("/api/status", fetcher, { refreshInterval: 20000 }).data;
-    const majorOrder = useSWR("/api/status/orders", fetcher, { refreshInterval: 20000 }).data;
+    const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
+    const apiStatus: StatusAPI = (useSWR("/api/status", fetcher, { refreshInterval: 20000 })).data;
+    const majorOrder = (useSWR("/api/status/orders", fetcher, { refreshInterval: 20000 })).data;
 
 
     useEffect(() => {

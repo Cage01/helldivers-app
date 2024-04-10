@@ -5,8 +5,8 @@ import PlayerCount from './playerCount'
 import './galaxyMap.css'
 import '@/app/stars.css'
 
-//const fetcher = (url: string | URL | Request) => fetch(url).then(r => r.json())
 async function GalaxyMap() {
+    //console.log(apiStatus)
 
     return (
         <section id='banner'>
@@ -14,7 +14,7 @@ async function GalaxyMap() {
             <div id='stars2'></div>
             <div id='stars3'></div>
 
-            <SectorChart />
+            <SectorChart/>
 
             <div id='title' className='md:-mt-2'>
                 <span>Live War Efforts</span>

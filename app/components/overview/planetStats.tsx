@@ -1,6 +1,5 @@
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
-import { TrendChart } from './trendChart'
 import useSWR from 'swr';
 import { Assignment } from '@/app/types/api/helldivers/assignment_types';
 import AnimatedNumber from "animated-number-react";
@@ -9,6 +8,7 @@ import { fetcher } from '@/app/classes/fetch';
 
 
 function PlanetStats(props: { planetIndex: number, planetName: string, assignment: Assignment, enemy: number }) {
+
     const [missionsWon, setMissionsWon] = useState(0);
     const [missionsLost, setMissionsLost] = useState(0);
     const [kills, setKills] = useState(0);
@@ -17,7 +17,7 @@ function PlanetStats(props: { planetIndex: number, planetName: string, assignmen
     const [deaths, setdeaths] = useState(0);
     const [hasData, setHasData] = useState(false);
 
-    const planetStats = useSWR("/api/status/stats/" + props.planetIndex + "?globalEventId=" + props.assignment.id32, fetcher, {refreshInterval:1800000 }).data
+    const planetStats = (useSWR("/api/status/stats/" + props.planetIndex + "?globalEventId=" + props.assignment.id32, fetcher, {refreshInterval:1800000 })).data
     
     useEffect(() => {
         if (planetStats != undefined) {

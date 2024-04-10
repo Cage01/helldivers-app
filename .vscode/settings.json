@@ -6,7 +6,9 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        ".vscode": true
+        ".vscode": true,
+        ".firebase": true,
+        ".next": true
     },
     "hide-files.files": [
         ".vscode"
