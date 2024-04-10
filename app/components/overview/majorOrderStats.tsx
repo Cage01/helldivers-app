@@ -1,4 +1,4 @@
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Tab, Tabs } from '@nextui-org/react'
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Tab, Tabs, Chip, Tooltip } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 import { TrendChart } from './trendChart'
 import { GalaxyStatus } from '@/app/types/api/helldivers/galaxy_status_types'
@@ -9,6 +9,8 @@ import { fetcher } from '@/app/classes/fetch'
 import PlanetStats from './planetStats'
 import AnimatedNumber from "animated-number-react";
 import { ChartData } from './interfaces'
+import MultihitChip from '../multihit_chip'
+
 
 
 
@@ -26,7 +28,7 @@ function MajorOrderStats(props: { war: { status: GalaxyStatus, info: WarInfo, ca
   const [bulletsHit, setbulletsHit] = useState(0);
   const [deaths, setdeaths] = useState(0);
 
-  const reqHistory = useSWR("/api/historical/stats/" + props.assignment.id32, fetcher, { refreshInterval: 1800000 }).data
+  const reqHistory = (useSWR("/api/historical/stats/" + props.assignment.id32, fetcher, { refreshInterval: 1800000 })).data
 
   const [historicalStats, setHistoricalStats] = useState<ChartData>();
 
@@ -40,14 +42,15 @@ function MajorOrderStats(props: { war: { status: GalaxyStatus, info: WarInfo, ca
       });
 
 
-      let factionID = 0
-      if (props.assignment.setting.overrideBrief.toLowerCase().includes("automaton")) {
-        setEnemy(3)
-        factionID = 3
-      } else if (props.assignment.setting.overrideBrief.toLowerCase().includes("terminid")) {
-        setEnemy(2)
-        factionID = 2
-      }
+      let factionID = props.assignment.enemyID;
+      setEnemy(factionID)
+      // if (props.assignment.setting.overrideBrief.toLowerCase().includes("automaton")) {
+      //   setEnemy(3)
+      //   factionID = 3
+      // } else if (props.assignment.setting.overrideBrief.toLowerCase().includes("terminid")) {
+      //   setEnemy(2)
+      //   factionID = 2
+      // }
 
       let kills = 0
       if (factionID == 3) {
@@ -61,7 +64,10 @@ function MajorOrderStats(props: { war: { status: GalaxyStatus, info: WarInfo, ca
       setKills(kills)
 
       const bf = (reqHistory[reqHistory.length - 1].bulletsFired - reqHistory[0].bulletsFired)
-      const bh = Math.floor((reqHistory[reqHistory.length - 1].accurracy / 100) * bf)
+      let bh = Math.floor((reqHistory[reqHistory.length - 1].accurracy / 100) * bf)
+      if (reqHistory[reqHistory.length - 1].accurracy == 100) {
+        bh = (reqHistory[reqHistory.length - 1].bulletsHit - reqHistory[0].bulletsHit)
+      }
       setbulletsFired(bf)
       setbulletsHit(bh)
 
@@ -158,7 +164,7 @@ function MajorOrderStats(props: { war: { status: GalaxyStatus, info: WarInfo, ca
                   <TableCell><TrendChart dataArray={historicalStats?.bulletsFired} /></TableCell>
                 </TableRow>
                 <TableRow key="5">
-                  <TableCell>Bullets Hit</TableCell>
+                  <TableCell>Bullets Hit <MultihitChip /></TableCell>
                   <TableCell><AnimatedNumber aria-label="bulletsHit" value={bulletsHit} formatValue={formatValue} duration={1100} /></TableCell>
                   <TableCell><TrendChart dataArray={historicalStats?.bulletsHit} /></TableCell>
                 </TableRow>

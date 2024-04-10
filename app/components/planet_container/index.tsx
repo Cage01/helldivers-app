@@ -10,7 +10,7 @@ import Planet from '@/app/classes/planet';
 import useSWR from 'swr';
 import { fetcher } from '@/app/classes/fetch';
 import AnimatedNumber from "animated-number-react";
-import { getDecayRate } from '@/app/utilities/client_functions';
+import { getDecayRate } from '@/app/utilities/universal_functions';
 import { HistoricalAPI } from '@/app/types/app_types';
 
 
@@ -19,6 +19,7 @@ const positive: string = "/images/up_arrows.svg"
 const negative: string = "/images/down_arrows.svg"
 
 function PlanetContainer(props: { planetStats: Planet }) {
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   var hasEvent: boolean = false;
   var endTime: number = 0;
@@ -64,7 +65,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
   const [victoryPrediction, setVictoryPrediction] = useState<number>();
   const [firstLoad, setFirstLoad] = useState(true)
 
-  const history: HistoricalAPI[] = useSWR("/api/historical?planetID=" + props.planetStats.index + "&campaignID=" + props.planetStats.campaign.id + "&hours=1", fetcher, { refreshInterval: 600000 }).data;
+  const history: HistoricalAPI[] = (useSWR("/api/historical?planetID=" + props.planetStats.index + "&campaignID=" + props.planetStats.campaign.id + "&hours=1", fetcher, { refreshInterval: 600000 })).data;
 
   //console.log(victoryPrediction)
   //console.log("=======")
@@ -269,8 +270,8 @@ function PlanetContainer(props: { planetStats: Planet }) {
             (victoryPrediction > props.planetStats.time && victoryPrediction > 0 && props.planetStats.time > 0 && victoryPrediction < (props.planetStats.time + 864000)) ?
             <Tooltip content="Predicted victory countdown based on liberation % per hour - using realtime and historical data" placement='bottom'>
               <div className='pt-2 flex gap-4 w-full'>
-                <span className='text-gray-400 inline-block float-left text-xs text-left'>Victory Countdown</span>
-                <CountdownTimer className="text-gray-400 block float-right text-xs text-right" currentTime={props.planetStats.time} endTime={victoryPrediction} />
+                <span className='text-gray-400 flex-grow float-left text-xs text-left'>Victory Countdown</span>
+                <CountdownTimer className="text-gray-400 flex-grow block float-right text-xs text-right" currentTime={props.planetStats.time} endTime={victoryPrediction} />
               </div>
             </Tooltip>
             :
@@ -345,7 +346,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                         <div className='before:border-red-600/70 border-red-600/90 border-1 rounded-large px-3 shadow-small text-sm mt-3 -mb-2 flex py-1'>
                           <Image src='/images/expire.svg' width={20} />
 
-                          <CountdownTimer className="text-sm flex-grow leading-[1.05rem] pl-1 text-red-400" currentTime={props.planetStats.time} endTime={victoryPrediction} />
+                          <CountdownTimer className="text-sm flex-grow leading-[1.05rem] pl-1 text-red-400" currentTime={props.planetStats.time} endTime={endTime} />
                         </div>
                       </Tooltip>
                     }

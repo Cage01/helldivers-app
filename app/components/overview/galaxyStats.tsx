@@ -1,5 +1,5 @@
 "use client"
-import { Card, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, CardHeader, CardBody, Image, Divider } from '@nextui-org/react'
+import { Card, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, CardHeader, CardBody, Image, Divider, Chip, Tooltip } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 import { TrendChart } from './trendChart';
 import useSWR from 'swr';
@@ -7,6 +7,9 @@ import { fetcher } from '@/app/classes/fetch';
 import AnimatedNumber from "animated-number-react";
 import { Assignment } from '@/app/types/api/helldivers/assignment_types';
 import { ChartData } from './interfaces';
+import MultihitChip from '../multihit_chip';
+
+
 
 function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, time: number }) {
 
@@ -24,8 +27,8 @@ function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, ti
 
     const [historicalStats, setHistoricalStats] = useState<ChartData>();
 
-    const reqStats = useSWR("/api/status/stats", fetcher, { refreshInterval: 20000 }).data
-    const reqHistory = useSWR("/api/historical/stats/from/" + props.time, fetcher, { refreshInterval: 20000 }).data
+    const reqStats = (useSWR("/api/status/stats", fetcher, { refreshInterval: 20000 })).data
+    const reqHistory = (useSWR("/api/historical/stats/from/" + props.time, fetcher, { refreshInterval: 20000 })).data
 
     //console.log(missionsWon)
 
@@ -121,47 +124,47 @@ function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, ti
                             <TableRow key="1">
                                 <TableCell>Missions Won</TableCell>
                                 <TableCell><AnimatedNumber aria-label="missionsWon" value={missionsWon} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.missionsWon}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.missionsWon} /></TableCell>
                             </TableRow>
                             <TableRow key="2">
                                 <TableCell>Missions Lost</TableCell>
                                 <TableCell><AnimatedNumber aria-label="missionsLost" value={missionsLost} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.missionsLost}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.missionsLost} /></TableCell>
                             </TableRow>
                             <TableRow key="3">
                                 <TableCell>Terminid Kills</TableCell>
                                 <TableCell><AnimatedNumber aria-label="bugKills" value={bugKills} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.bugKills}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.bugKills} /></TableCell>
                             </TableRow>
                             <TableRow key="4">
                                 <TableCell>Automaton Kills</TableCell>
                                 <TableCell><AnimatedNumber aria-label="automatonKills" value={automatonKills} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.automatonKills}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.automatonKills} /></TableCell>
                             </TableRow>
                             <TableRow key="5">
                                 <TableCell>Bullets Fired</TableCell>
                                 <TableCell><AnimatedNumber aria-label="bulletsFired" value={bulletsFired} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.bulletsFired}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.bulletsFired} /></TableCell>
                             </TableRow>
                             <TableRow key="6">
-                                <TableCell>Bullets Hit</TableCell>
+                                <TableCell>Bullets Hit <MultihitChip /></TableCell>
                                 <TableCell><AnimatedNumber aria-label="bulletsHit" value={bulletsHit} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.bulletsHit}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.bulletsHit} /></TableCell>
                             </TableRow>
                             <TableRow key="7">
                                 <TableCell>Time Played</TableCell>
                                 <TableCell><AnimatedNumber aria-label="timePlayed" value={timePlayed} formatValue={formatTime} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.timePlayed}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.timePlayed} /></TableCell>
                             </TableRow>
                             <TableRow key="8">
                                 <TableCell>Deaths</TableCell>
                                 <TableCell><AnimatedNumber aria-label="deaths" value={deaths} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.deaths}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.deaths} /></TableCell>
                             </TableRow>
                             <TableRow key="9">
                                 <TableCell>Friendly Kills</TableCell>
                                 <TableCell><AnimatedNumber aria-label="friendlies" value={friendlies} formatValue={formatValue} duration={1100} /></TableCell>
-                                <TableCell><TrendChart dataArray={historicalStats?.friendlies}/></TableCell>
+                                <TableCell><TrendChart dataArray={historicalStats?.friendlies} /></TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>

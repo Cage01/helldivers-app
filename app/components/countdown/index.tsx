@@ -3,19 +3,19 @@ import { Skeleton } from '@nextui-org/react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react'
 
-function CountdownTimer(props: { currentTime?: number, endTime?: number, expiresIn?: number, className?: string }) {
-  
+function CountdownTimer(props: { currentTime?: number, endTime?: number, expiresIn?: number, className?: string, classNames?: {span: string} }) {
+
   let delta = 0;
   if (props.expiresIn != undefined) {
     delta = props.expiresIn
-  } else if (props.currentTime != undefined && props.endTime != undefined){
+  } else if (props.currentTime != undefined && props.endTime != undefined) {
     //console.log("Current Time: " + props.currentTime)
     //console.log("End Time: " + props.endTime)
 
     delta = props.endTime - props.currentTime
     //console.log("Delta: " + delta)
   }
-  
+
   //const [planetStatus, setplanetStatus] = useState(false);
   const [expire, setExpire] = useState(moment().add(delta, 'seconds').toDate().getTime());
   const [days, setDays] = useState(0);
@@ -43,7 +43,7 @@ function CountdownTimer(props: { currentTime?: number, endTime?: number, expires
     const interval = setInterval(() => {
       const now = new Date();
       const difference = expire - now.getTime();
-    
+
       //console.log(difference)
 
       const d = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -70,17 +70,16 @@ function CountdownTimer(props: { currentTime?: number, endTime?: number, expires
 
   return (
     <div className={(props.className != undefined) ? props.className : ""}>
-      {(days > 0) ?
-        <span className="time">{days}d</span> : <></>}
 
       {(hours > 0 || minutes > 0 || seconds > 0) ?
         <>
-          <span className="time"> {hours}h</span>
-          <span className="time"> {minutes}m</span>
-          <span className="time"> {seconds}s</span>
+          <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}>{days}d</span>
+          <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}> {hours}h</span>
+          <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}> {minutes}m</span>
+          <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}> {seconds}s</span>
         </>
-      :
-      <></>
+        :
+        <></>
       }
 
     </div>
