@@ -1,5 +1,6 @@
-import { MajorOrderType } from "../classes/enums";
+import { MajorOrderType } from "../enums";
 import { Reward, Task } from "./api/helldivers/assignment_types";
+
 
 export type FGlobalEvent = {
     progress:        number[];
@@ -87,3 +88,4 @@ export type FTimestamp = {
     seconds: number,
     nanoseconds: number
 }
+
