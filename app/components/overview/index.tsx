@@ -27,7 +27,7 @@ function Overview() {
 
         const interval = setInterval(() => {
             setTime(timeAgo)
-        }, 600000);
+        }, 1200000);
 
         return () => clearInterval(interval);
 

@@ -1,7 +1,7 @@
 import { GalaxyStatus, PlanetEvent, PlanetStatus } from "../types/api/helldivers/galaxy_status_types";
 import Planet from "../classes/planet";
 import { MajorOrderAssociation, MajorOrderType } from "../classes/enums";
-import { FCampaignProgress } from "../types/firebase_types";
+import { FProgress } from "../types/firebase_types";
 import { StatusAPI } from "../types/app_types";
 import { Assignment } from "../types/api/helldivers/assignment_types";
 
@@ -29,9 +29,7 @@ export function sortPlanets(assignment: Assignment, planets: Planet[], sortByPer
             let num = -1;
             if (sortByPercentage) {
                 if (tier == 1) {
-                    if (planets[i].majorOrderAssociation == MajorOrderAssociation.mainObjective 
-                        || (assignment.determinedType == MajorOrderType.defend && planets[i].enemyFactionID == assignment.enemyID)) {
-                        //console.log("Name: " + planets[i].name + " - ID: " + planets[i].index + " - level: " + planets[i].majorOrderAssociation + " - PlanetEnemy: " + planets[i].enemyFactionID + " - AssignmentEnemy: " + assignment.enemyID)
+                    if (planets[i].majorOrderAssociation == MajorOrderAssociation.mainObjective) {
 
                         num = max + planets[i].liberation
                     } else if (planets[i].majorOrderAssociation == MajorOrderAssociation.associated && planets[i].hasEvent) {
@@ -47,7 +45,9 @@ export function sortPlanets(assignment: Assignment, planets: Planet[], sortByPer
                     } else {
                         num = planets[i].liberation;
                     }
-                    //console.log(planets[i].name + " " + num)
+
+                    // console.log("Name: " + planets[i].name + " - ID: " + planets[i].index + " - level: " + planets[i].majorOrderAssociation + " - PlanetEnemy: " + planets[i].enemyFactionID + " - AssignmentEnemy: " + assignment.enemyID)
+                    // console.log(planets[i].name + " " + num)
                 } else {
                     
                     num = planets[i].liberation
@@ -101,7 +101,7 @@ export function getPlanetEnemyID(planetIndex: number, apiStatus: StatusAPI ) {
 
 
 
-export function getDecayRate(maxHealth: number, regenRate: number, hasEvent: boolean, history?: FCampaignProgress[]) {
+export function getDecayRate(maxHealth: number, regenRate: number, hasEvent: boolean, history?: FProgress[]) {
     if (history != undefined) {
         let liberation: number[] = []
   

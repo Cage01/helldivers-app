@@ -3,7 +3,7 @@ import { Skeleton } from '@nextui-org/react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react'
 
-function CountdownTimer(props: { currentTime?: number, endTime?: number, expiresIn?: number, className?: string, classNames?: {span: string} }) {
+function CountdownTimer(props: { currentTime?: number, endTime?: number, expiresIn?: number, includeDays?: boolean, className?: string, classNames?: { span: string } }) {
 
   let delta = 0;
   if (props.expiresIn != undefined) {
@@ -15,6 +15,7 @@ function CountdownTimer(props: { currentTime?: number, endTime?: number, expires
     delta = props.endTime - props.currentTime
     //console.log("Delta: " + delta)
   }
+
 
   //const [planetStatus, setplanetStatus] = useState(false);
   const [expire, setExpire] = useState(moment().add(delta, 'seconds').toDate().getTime());
@@ -73,7 +74,10 @@ function CountdownTimer(props: { currentTime?: number, endTime?: number, expires
 
       {(hours > 0 || minutes > 0 || seconds > 0) ?
         <>
-          <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}>{days}d</span>
+          {((props.includeDays != undefined && props.includeDays) || days > 0) &&
+            <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}>{days}d</span>
+          }
+
           <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}> {hours}h</span>
           <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}> {minutes}m</span>
           <span className={((props.classNames?.span != undefined) ? props.classNames.span : "") + " time"}> {seconds}s</span>

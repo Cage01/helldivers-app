@@ -5,7 +5,7 @@ export type FGlobalEvent = {
     progress:        number[];
     determinedType:  MajorOrderType;
     enemyID:         number;
-    expires:         FTimestamp | Date
+    expires:         FTimestamp
     id:              number;
     taskDescription: string;
     flags:           number;
@@ -14,15 +14,15 @@ export type FGlobalEvent = {
     type:            number;
     overrideBrief:   string;
     tasks:           Task[];
-    created: FTimestamp | Date
-    updated: FTimestamp | Date
+    created: FTimestamp
+    updated: FTimestamp
 }
 
 export type FPlanetEvent = {
     campaignId:        number;
-    created:           FTimestamp | Date;
+    created:           FTimestamp;
     eventType:         number;
-    expireDate:        FTimestamp | Date;
+    expireDate:        FTimestamp;
     expireTime:        number;
     id:                number;
     jointOperationIds: number[];
@@ -30,7 +30,7 @@ export type FPlanetEvent = {
     race:              number;
     resultFlag:        number;
     startTime:         number;
-    updated:           FTimestamp | Date;
+    updated:           FTimestamp;
 }
 
 export type FProgress = {
@@ -39,7 +39,7 @@ export type FProgress = {
     bulletsFired:     number;
     bulletsHit:       number;
     campaignId:       number;
-    created:          FTimestamp | Date;
+    created:          FTimestamp;
     deaths:           number;
     eventID:          number;
     friendlyKills:    number;
@@ -56,14 +56,14 @@ export type FProgress = {
 
 export type FCampaign = {
     count:       number;
-    created:     FTimestamp | Date;
+    created:     FTimestamp;
     eventId:     number[];
     hasEvent:    boolean;
     id:          number;
     planetIndex: number;
     resultFlag:  number;
     type:        number;
-    updated:     FTimestamp | Date;
+    updated:     FTimestamp;
 }
 
 export type FStats = {
@@ -72,7 +72,7 @@ export type FStats = {
     bugKills:           number;
     bulletsFired:       number;
     bulletsHit:         number;
-    created:            FTimestamp | Date;
+    created:            FTimestamp;
     deaths:             number;
     friendlies:         number;
     illuminateKills:    number;

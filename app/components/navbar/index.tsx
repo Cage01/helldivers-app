@@ -6,6 +6,7 @@ import { SteamNews } from "@/app/types/api/steam/steam_news_types";
 import './navbar.scss'
 import FirebaseInstance from "@/app/classes/firebase";
 import SiteMessage from "./siteMessage";
+import { KofiButton } from "react-kofi-button";
 
 async function Navigation() {
   //TODO: need to store in DB and check for new updates. If none exists then use DB version
@@ -23,7 +24,7 @@ async function Navigation() {
         <NavbarBrand>
           <Logo />
         </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarContent className="hidden sm:flex gap-4 -ml-10" justify="center">
           <NavbarItem isActive>
             <Link color="foreground" href="#" aria-current="page">
               Home
@@ -46,9 +47,19 @@ async function Navigation() {
             </Link>
           </NavbarItem>
         </NavbarContent>
-        <NavbarContent justify="end">
+        <NavbarContent justify="end" className="smphone:-ml-10 md:ml-0">
+
           <NavbarItem>
             <Button news={news} />
+          </NavbarItem>
+
+          <NavbarItem className="text-sm">
+            <KofiButton
+              username="helldiversnews"
+              label="Show support?"
+              preset="thin"
+              backgroundColor="kofiGrey"
+            />
           </NavbarItem>
         </NavbarContent>
 

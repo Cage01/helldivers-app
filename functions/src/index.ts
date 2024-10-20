@@ -9,6 +9,8 @@ import FirebaseInstance from "./db";
 import { FCampaign, FGlobalEvent } from "./types/firebase_types";
 import { buildCampaignProgress, determineAssignmentType, determineEnemyID, serverTimeToDate } from "./utils";
 import { Assignment } from "./types/api/helldivers/assignment_types";
+require("firebase-functions/logger/compat");
+
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 
@@ -48,14 +50,14 @@ export default async function writeToDB() {
 
 
         //Add current galaxy stats to DB
-        firebase.addGalaxyStatsDoc({ created: now, ...warStatsData.galaxy_stats })
+        await firebase.addGalaxyStatsDoc({ created: now, ...warStatsData.galaxy_stats })
 
         //Create and update campaign entries
         statusData.campaigns.forEach(async (campaign: Campaign) => {
             if (await firebase.campaignExists(campaign)) {
                 console.debug("Found campaign")
-                firebase.addProgressDoc(campaign, buildCampaignProgress(campaign.planetIndex, infoData, statusData, warStatsData))
-                firebase.updateCampaign(campaign, { updated: now, resultFlag: EventResult.active })
+                await firebase.addProgressDoc(campaign, buildCampaignProgress(campaign.planetIndex, infoData, statusData, warStatsData))
+                await firebase.updateCampaign(campaign, { updated: now, resultFlag: EventResult.active })
             } else {
                 const planetEvent: PlanetEvent | undefined = statusData.planetEvents.find(e => e.campaignId === campaign.id)
 
@@ -74,7 +76,7 @@ export default async function writeToDB() {
         //Create and update planet event entries - Dont add progress docs here
         statusData.planetEvents.forEach(async (event: PlanetEvent) => {
             if (!(await firebase.planetEventExists(event))) {
-                firebase.createPlanetEvent({
+                await firebase.createPlanetEvent({
                     ...event,
                     created: now,
                     expireDate: await serverTimeToDate(event.expireTime),
@@ -89,11 +91,12 @@ export default async function writeToDB() {
         assignmentData.forEach(async (element: Assignment) => {
             if (await firebase.globalEventExists(element.id32)) {
                 console.debug("Found global event")
-                firebase.updateGlobalEvent(element.id32, { progress: element.progress, updated: now })
+                await firebase.updateGlobalEvent(element.id32, { progress: element.progress, updated: now })
             } else {
                 let expiration = moment().add(element.expiresIn, "seconds").toDate();
-
-                firebase.createGlobalEvent({
+                console.debug("Creating Global Event")
+                
+                await firebase.createGlobalEvent({
                     progress: element.progress,
                     determinedType: determineAssignmentType(element),
                     enemyID: determineEnemyID(element, statusData, infoData),
@@ -134,18 +137,18 @@ async function validateCampaignProgress(firebase: FirebaseInstance, statusData: 
 
     const dbActiveCampaigns = await firebase.getActiveCampaigns();
 
-    const finisheCampaigns: FCampaign[] = [];
+    const finishedCampaigns: FCampaign[] = [];
     dbActiveCampaigns.forEach(element => {
         const foundCampaign = statusData.campaigns.find(c => c.id == element.id)
 
         //if the campaignID is not found in the API then is must be finished
         if (foundCampaign == undefined) {
-            finisheCampaigns.push(element)
+            finishedCampaigns.push(element)
         }
     });
 
     //for each of the finished campaigns see which faction owns the planet
-    finisheCampaigns.forEach(async element => {
+    finishedCampaigns.forEach(async element => {
         let result: EventResult;
         if (statusData.planetStatus[element.planetIndex].owner <= 1) {
             result = EventResult.success

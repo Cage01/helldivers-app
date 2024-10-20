@@ -1,7 +1,7 @@
 import { PlanetStatus, PlanetEvent, GalaxyStatus, Campaign } from "@/app/types/api/helldivers/galaxy_status_types";
 import { PlanetInfo } from "@/app/types/api/helldivers/war_info_types";
 import { Assignment } from "../types/api/helldivers/assignment_types";
-import { MajorOrderAssociation } from "./enums";
+import { MajorOrderAssociation, MajorOrderType } from "./enums";
 import { PlanetsAPI, StatusAPI } from "../types/app_types";
 import { getPlanetEvent } from "../utilities/universal_functions";
 
@@ -55,6 +55,13 @@ class Planet {
         this.info =  apiStatus.info.planetInfos[this.index];
         this.event = getPlanetEvent(this.index, apiStatus.status);
 
+        if (this.event == null){
+            this.hasEvent = false;
+            this.enemyFactionID = (this.status.owner > 1) ? this.status.owner : this.info.initialOwner;
+        } else {
+            this.hasEvent = true;
+            this.enemyFactionID = this.event.race;
+        }
 
 
         this.playerCount = this.status.players;
@@ -65,6 +72,11 @@ class Planet {
             const order = majorOrder.setting.tasks[i]
             if (this.index == order.planetIndex) {
                 this.majorOrderAssociation = MajorOrderAssociation.mainObjective
+                break
+            }
+
+            if (this.hasEvent && this.enemyFactionID == majorOrder.enemyID && majorOrder.determinedType == MajorOrderType.defend) {
+                this.majorOrderAssociation = MajorOrderAssociation.mainObjective;
                 break
             }
 
@@ -86,16 +98,14 @@ class Planet {
                     this.majorOrderAssociation = MajorOrderAssociation.tertiary
                 }
             });
+
+            if (this.enemyFactionID == majorOrder.enemyID && majorOrder.determinedType == MajorOrderType.defend) {
+                this.majorOrderAssociation = MajorOrderAssociation.tertiary
+            }
         }
 
 
-        if (this.event == null){
-            this.hasEvent = false;
-            this.enemyFactionID = (this.status.owner > 1) ? this.status.owner : this.info.initialOwner;
-        } else {
-            this.hasEvent = true;
-            this.enemyFactionID = this.event.race;
-        }
+
 
         //Getting attacking race 
         // console.log(this.name + " fighting " + this.enemyFactionID)

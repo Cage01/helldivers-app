@@ -7,12 +7,13 @@ import { FProgress } from "./types/firebase_types";
 import { MajorOrderType } from "./enums";
 import { Assignment, Task } from "./types/api/helldivers/assignment_types";
 
+const PLANET_COUNT = 261
 
 export async function serverTimeToDate(time: number) {
     const urlTime: string = 'https://api.live.prod.thehelldiversgame.com/api/WarSeason/801/WarTime';
 
-    const req= await axios.get(urlTime, { headers: { "Accept-Language": "en-US,en;q=0.5", "User-Agent": "Cage - helldivers.news (Archiver)" } });
-    const serverTime  = req.data.time
+    const req = await axios.get(urlTime, { headers: { "Accept-Language": "en-US,en;q=0.5", "User-Agent": "Cage - helldivers.news (Archiver)" } });
+    const serverTime = req.data.time
 
     let delta = serverTime - time;
 
@@ -50,14 +51,14 @@ export function buildCampaignProgress(planetIndex: number, info: WarInfo, status
     res.health = (planetEvents != undefined) ? planetEvents.health : res.health;
     res.maxHealth = (planetEvents != undefined) ? planetEvents.maxHealth : res.maxHealth;
     res.eventID = (planetEvents != undefined) ? planetEvents.id : 0;
-    
+
     res.created = new Date();
 
     return res
 }
 
 
-export function determineAssignmentType(assignment: { setting: { taskDescription: string; }; }) {
+export function determineAssignmentType(assignment: Assignment) {
     let type = MajorOrderType.unknown;
 
     if (assignment.setting.taskDescription.split(" ")[0] == "Liberate") {
@@ -67,6 +68,8 @@ export function determineAssignmentType(assignment: { setting: { taskDescription
         type = MajorOrderType.control
     } else if (assignment.setting.taskDescription.toLowerCase().includes("defense") || assignment.setting.taskDescription.toLowerCase().includes("defend")) {
         type = MajorOrderType.defend
+    } else if (assignment.setting.taskDescription.toLocaleLowerCase().includes("kill") && assignment.setting.tasks.length == 1 && assignment.setting.tasks[0].values[2] > PLANET_COUNT) {
+        type = MajorOrderType.kill
     }
 
     return type;
@@ -75,23 +78,32 @@ export function determineAssignmentType(assignment: { setting: { taskDescription
 export function determineEnemyID(assignment: Assignment, status: GalaxyStatus, info: WarInfo) {
     let enemyID = 0;
 
-    if (assignment.setting.overrideBrief.toLowerCase().includes("automaton")) {
+    //Check Task description first. It holds more weight than the others (Instances where the brief contains another factiosn name have occurred)
+    if (assignment.setting.taskDescription.toLowerCase().includes("automaton")) {
         enemyID = 3
-    } else if (assignment.setting.overrideBrief.toLowerCase().includes("terminid") || assignment.setting.overrideBrief.toLowerCase().includes("bug")) {
+    } else if (assignment.setting.taskDescription.toLowerCase().includes("terminid") || assignment.setting.overrideBrief.toLowerCase().includes("bug")) {
         enemyID = 2
     } else {
-        for (let i = 0; i < assignment.setting.tasks.length; i++) {
-            const task: Task = assignment.setting.tasks[i]
-            const planetIndex = task.values[2]
-            const event = status.planetEvents.find(pe => pe.planetIndex == planetIndex)
 
-            if (event == undefined) {
-                enemyID = (status.planetStatus[planetIndex].owner > 1) ? status.planetStatus[planetIndex].owner : info.planetInfos[planetIndex].initialOwner
-            } else {
-                enemyID = event.race;
+
+        if (assignment.setting.overrideBrief.toLowerCase().includes("automaton")) {
+            enemyID = 3
+        } else if (assignment.setting.overrideBrief.toLowerCase().includes("terminid") || assignment.setting.overrideBrief.toLowerCase().includes("bug")) {
+            enemyID = 2
+        } else {
+            for (let i = 0; i < assignment.setting.tasks.length; i++) {
+                const task: Task = assignment.setting.tasks[i]
+                const planetIndex = task.values[2]
+                const event = status.planetEvents.find(pe => pe.planetIndex == planetIndex)
+
+                if (event == undefined) {
+                    enemyID = (status.planetStatus[planetIndex].owner > 1) ? status.planetStatus[planetIndex].owner : info.planetInfos[planetIndex].initialOwner
+                } else {
+                    enemyID = event.race;
+                }
+
+                return enemyID
             }
-
-            return enemyID
         }
     }
 

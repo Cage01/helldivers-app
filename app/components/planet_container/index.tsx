@@ -54,7 +54,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
   }, [ref])
 
 
-
+  const [planetimage, setPlanetImage] = useState(props.planetStats.image)
   const [id, setId] = useState(props.planetStats.campaign.id);
   const [planetID, setPlanetID] = useState(props.planetStats.index);
   const [playerCount, setPlayerCount] = useState(props.planetStats.playerCount);
@@ -65,13 +65,13 @@ function PlanetContainer(props: { planetStats: Planet }) {
   const [victoryPrediction, setVictoryPrediction] = useState<number>();
   const [firstLoad, setFirstLoad] = useState(true)
 
-  const history: HistoricalAPI[] = (useSWR("/api/historical?planetID=" + props.planetStats.index + "&campaignID=" + props.planetStats.campaign.id + "&hours=1", fetcher, { refreshInterval: 600000 })).data;
+  const history: HistoricalAPI[] = (useSWR("/api/historical?planetID=" + props.planetStats.index + "&campaignID=" + props.planetStats.campaign.id + "&hours=1", fetcher, { refreshInterval: 300000 })).data;
 
   //console.log(victoryPrediction)
   //console.log("=======")
   useEffect(() => {
     if (history != undefined) {
-      
+
       //console.log(history)
       let tmpDecay = getDecayRate(props.planetStats.maxHealth, props.planetStats.status.regenPerSecond, props.planetStats.hasEvent, history[0].progress);
       if (decayRate != tmpDecay) {
@@ -168,7 +168,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
           <Image
             alt="Card background"
             className="object-cover rounded-xl"
-            src={props.planetStats.image}
+            src={planetimage}
             style={{ display: "inline", position: "relative", marginTop: "-30px" }}
             width={250}
           />
@@ -189,52 +189,20 @@ function PlanetContainer(props: { planetStats: Planet }) {
 
         <CardBody className="overflow-visible py-2">
 
-          {trend == positive &&
+          <div className='h-4'>
             <Tooltip content="Realtime liberation compared to the previous value 20 seconds ago" showArrow={true} placement='left'>
               <Image
-                alt="impact"
-                className="object-cover rounded-xl -ml-1"
-
-                loading='eager'
-                src={positive}
-                style={{ display: "inline", position: "relative", marginTop: "-30px", opacity: "0.58" }}
+                alt="impact_0"
+                className="object-cover rounded-xl -ml-1 absolute"
+                key={"impact_0"}
+                //loading='eager'
+                src={trend}
+                style={{ marginTop: "-30px", opacity: "0.58" }}
                 width={30}
                 height={40}
               />
             </Tooltip>
-          }
-
-
-          {trend == negative &&
-            <Tooltip content="Realtime liberation compared to the previous value 20 seconds ago" showArrow={true} placement='left'>
-              <Image
-                alt="impact"
-                className="object-cover rounded-xl -ml-1"
-
-                loading='eager'
-                src={negative}
-                style={{ display: "inline", position: "relative", marginTop: "-30px", opacity: "0.58" }}
-                width={30}
-                height={40}
-              />
-            </Tooltip>
-          }
-
-          {trend == neutral &&
-            <Tooltip content="Realtime liberation compared to the previous value 20 seconds ago" showArrow={true} placement='left'>
-              <Image
-                alt="impact"
-                className="object-cover rounded-xl -ml-1"
-
-                loading='eager'
-                src={neutral}
-                style={{ display: "inline", position: "relative", marginTop: "-30px", opacity: "0.58" }}
-                width={30}
-                height={40}
-              />
-            </Tooltip>
-          }
-
+          </div>
 
           <h4 className="planet-name text-large uppercase font-bold text-center">{props.planetStats.name}</h4>
 
@@ -269,9 +237,11 @@ function PlanetContainer(props: { planetStats: Planet }) {
           {(victoryPrediction != undefined) &&
             (victoryPrediction > props.planetStats.time && victoryPrediction > 0 && props.planetStats.time > 0 && victoryPrediction < (props.planetStats.time + 864000)) ?
             <Tooltip content="Predicted victory countdown based on liberation % per hour - using realtime and historical data" placement='bottom'>
-              <div className='pt-2 flex gap-4 w-full'>
+              <div className='pt-2 flex gap-2 w-full'>
                 <span className='text-gray-400 flex-grow float-left text-xs text-left'>Victory Countdown</span>
-                <CountdownTimer className="text-gray-400 flex-grow block float-right text-xs text-right" currentTime={props.planetStats.time} endTime={victoryPrediction} />
+                <CountdownTimer className="text-gray-400 flex-grow block float-right text-xs text-right"
+                  classNames={{span: "flex-grow"}} 
+                  currentTime={props.planetStats.time} endTime={victoryPrediction} />
               </div>
             </Tooltip>
             :
@@ -281,7 +251,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
           }
 
         </CardFooter>
-      </Card>
+      </Card >
 
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop='blur' size='lg' ref={ref}>
         <ModalContent>
@@ -304,7 +274,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                   <Image
                     alt="Card background"
                     className="rounded-xl object-cover brightness-75"
-                    src={props.planetStats.image}
+                    src={planetimage}
 
                     width={250}
                   />
@@ -341,7 +311,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                   <p className='smphone:text-xs sm:text-small absolute mt-5 sm:ml-60 smphone:ml-48'><AnimatedNumber aria-label="players" value={playerCount} formatValue={formatValue} duration={1100} /> Players</p>
 
                   <div className='absolute smphone:-ml-10 smphone:-mt-28 phone:-ml-12 xs:-ml-20 sm:-ml-[7rem] sm:-mt-[6.6rem] z-50'>
-                    {hasEvent &&    
+                    {hasEvent &&
                       <Tooltip content="Defense expiration timer">
                         <div className='before:border-red-600/70 border-red-600/90 border-1 rounded-large px-3 shadow-small text-sm mt-3 -mb-2 flex py-1'>
                           <Image src='/images/expire.svg' width={20} />
@@ -353,7 +323,7 @@ function PlanetContainer(props: { planetStats: Planet }) {
                     <CircularProgress
                       aria-label="Democratizing"
                       size="lg"
-                      className= {(hasEvent ? "smphone:ml-4 sm:ml-7" : 'smphone:ml-3 sm:ml-0') + ' mt-5'}
+                      className={(hasEvent ? "smphone:ml-4 sm:ml-7" : 'smphone:ml-3 sm:ml-0') + ' mt-5'}
                       classNames={{
                         svg: "w-[4rem] h-[4rem] drop-shadow-md",
                         value: "text-sm font-semibold text-white",

@@ -10,11 +10,18 @@ import { FGlobalEvent } from "../types/firebase_types";
 import { MajorOrderType } from "../classes/enums";
 
 const baseURL = "https://api.live.prod.thehelldiversgame.com/api/"
+const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
+const PLANET_COUNT = 261
 
 export async function queryWarTimeExternal() {
   try {
-    const res = await fetch(baseURL + "WarSeason/801/WarTime", { next: { revalidate: 10 } });
-    res.headers.append("Accept-Language", "en-US,en;q=0.5")
+    const res = await fetch(baseURL + "WarSeason/801/WarTime", {
+      next: { revalidate: 10 },
+      headers: {
+        "User-Agent": "Cage - helldivers.news",
+        "Accept-Language": "en-US,en;q=0.5"
+      }
+    });
 
     return await res.json()
   } catch (error) {
@@ -26,10 +33,21 @@ export async function queryWarTimeExternal() {
 
 export async function queryStatusExternal() {
   try {
-    const res_info = await fetch(baseURL + 'WarSeason/801/WarInfo', { next: { revalidate: 20 } });
+    const res_info = await fetch(baseURL + 'WarSeason/801/WarInfo', { next: { revalidate: 20 },
+    headers: {
+      "User-Agent": "Cage - helldivers.news",
+      "Accept-Language": "en-US,en;q=0.5"
+    }});
+    
     const warInfo = await res_info.json();
 
-    const res_status = await fetch(baseURL + 'WarSeason/801/Status', { next: { revalidate: 20 } });
+    const res_status = await fetch(baseURL + 'WarSeason/801/Status', {
+      next: { revalidate: 20 },
+      headers: {
+        "User-Agent": "Cage - helldivers.news",
+        "Accept-Language": "en-US,en;q=0.5"
+      }
+    });
     const status = await res_status.json();
 
     let campaignWaypoints: { planetIndex: number, planetName: string, campaignId: number; waypoints: any; }[] = []
@@ -51,8 +69,14 @@ export async function queryNewsFeedExternal() {
   time -= 172800 //1 day
 
   try {
-    const res = await fetch(baseURL + 'NewsFeed/801?fromTimestamp=' + time, { next: { revalidate: 20 } });
-    res.headers.append("Accept-Language", "en-US,en;q=0.5")
+    const res = await fetch(baseURL + 'NewsFeed/801?fromTimestamp=' + time, {
+      next: { revalidate: 20 },
+      headers: {
+        "User-Agent": "Cage - helldivers.news",
+        "Accept-Language": "en-US,en;q=0.5"
+      }
+    });
+
     return await res.json()
   } catch (error) {
     console.error(error)
@@ -64,27 +88,36 @@ export async function queryNewsFeedExternal() {
 // Major Orders
 export async function queryAssignmentExternal() {
   try {
-    const res = await fetch(baseURL + "v2/Assignment/War/801", { next: { revalidate: 20 } });
-    res.headers.append("Accept-Language", "en-US,en;q=0.5")
+    const res = await fetch(baseURL + "v2/Assignment/War/801", {
+      next: { revalidate: 20 },
+      headers: {
+        "User-Agent": "Cage - helldivers.news",
+        "Accept-Language": "en-US,en;q=0.5"
+      }
+    });
 
     let apiAssignment = await res.json();
+    //console.log(apiAssignment)
 
 
     let status = await queryStatusExternal();
 
     if (apiAssignment.length > 0) {
+      //console.log("Entered")
       let assignment: Assignment = apiAssignment[0];
+
 
       //TODO: There could be an instance where there are multiple major orders to iterate through
       assignment.source = "api"
       assignment.setting.tasks = updateTasks(assignment.setting.tasks)
       assignment.determinedType = determineAssignmentType(assignment)
-      
+
       let enemy = await getAssignmentEnemy(assignment, assignment.setting.tasks, status);
       assignment.enemyID = enemy;
 
       return assignment;
     } else {
+      //console.log("why?")
       //Get last order
       const db = new FirebaseInstance();
       const last: FGlobalEvent = await db.getLastGlobalEvent()
@@ -114,18 +147,29 @@ export async function queryAssignmentExternal() {
   } catch (error) {
     console.error(error)
   }
-  
+
   return {} as Assignment
 }
 
-
 function updateTasks(tasks: any[]) {
-  const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
+  //console.log(tasks)
   for (let i = 0; i < tasks.length; i++) {
-    const index = tasks[i].values[2]
+    
+    let index = 0;
+    let name = "";
+
+    //console.log(planets.length)
+    if (tasks[i].values[2] <= PLANET_COUNT) {
+      index = tasks[i].values[2]
+      name = planets[index].name
+
+      //console.log(index)
+      //console.log(planets[index]);
+    }
+
     const updatedTasks: Task = {
       planetIndex: index,
-      planetName: planets[index].name,
+      planetName: name,
       ...tasks[i],
     }
 
@@ -145,6 +189,8 @@ function determineAssignmentType(assignment: Assignment) {
     type = MajorOrderType.control
   } else if (assignment.setting.taskDescription.toLowerCase().includes("defense") || assignment.setting.taskDescription.toLowerCase().includes("defend")) {
     type = MajorOrderType.defend
+  } else if (assignment.setting.taskDescription.toLocaleLowerCase().includes("kill") && assignment.setting.tasks.length == 1 && assignment.setting.tasks[0].values[2] > planets.length) {
+    type = MajorOrderType.kill
   }
 
   return type;
@@ -154,27 +200,37 @@ export async function getAssignmentEnemy(assignment: Assignment, tasks: Task[], 
   //console.log(assignmentID)
   let assignmentEnemy = 0;
 
-  if (assignment.setting.overrideBrief.toLowerCase().includes("automaton")) {
+  if (assignment.setting.taskDescription.toLowerCase().includes("automaton")) {
     assignmentEnemy = 3
-  } else if (assignment.setting.overrideBrief.toLowerCase().includes("terminid") || assignment.setting.overrideBrief.toLowerCase().includes("bug")) {
+  } else if (assignment.setting.taskDescription.toLowerCase().includes("terminid") || assignment.setting.overrideBrief.toLowerCase().includes("bug")) {
     assignmentEnemy = 2
   } else {
-    for (let i = 0; i < tasks.length; i++) {
-      let id = getPlanetEnemyID(tasks[i].planetIndex, status)
-      if (id > 1) {
-        assignmentEnemy = id;
+
+
+    if (assignment.setting.overrideBrief.toLowerCase().includes("automaton")) {
+      assignmentEnemy = 3
+    } else if (assignment.setting.overrideBrief.toLowerCase().includes("terminid") || assignment.setting.overrideBrief.toLowerCase().includes("bug")) {
+      assignmentEnemy = 2
+    } else {
+      for (let i = 0; i < tasks.length; i++) {
+        let id = getPlanetEnemyID(tasks[i].planetIndex, status)
+        if (id > 1) {
+          assignmentEnemy = id;
+        }
       }
-    }
   
-    if (assignmentEnemy <= 1) {
-      //Check database
-      const db = new FirebaseInstance();
-      let event: FGlobalEvent = await db.getGlobalEventByID(assignment.id32)
-      if (event != undefined) {
-        assignmentEnemy = event.enemyID
-      }
+      // if (assignmentEnemy <= 1) {
+      //   //Check database
+      //   const db = new FirebaseInstance();
+      //   let event: FGlobalEvent = await db.getGlobalEventByID(assignment.id32)
+      //   if (event != undefined) {
+      //     assignmentEnemy = event.enemyID
+      //   }
+      // }
     }
   }
+
+
 
 
 
@@ -183,8 +239,12 @@ export async function getAssignmentEnemy(assignment: Assignment, tasks: Task[], 
 
 export async function queryGalaxyStatsExternal() {
   try {
-    const res = await fetch('https://api.diveharder.com/raw/planetStats', { next: { revalidate: 20 } })
-    res.headers.append("Accept-Language", "en-US,en;q=0.5")
+    const res = await fetch('https://api.diveharder.com/raw/planetStats', {
+      next: { revalidate: 20 }, headers: {
+        "User-Agent": "Cage - helldivers.news",
+        "Accept-Language": "en-US,en;q=0.5"
+      }
+    })
 
     return await res.json();
   } catch (error) {
@@ -209,7 +269,6 @@ export function getRandomPlanetImage() {
 
 
 export function getPlanetNameFromID(index: number): string {
-  const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
 
   return planets[index].name
 }
@@ -235,7 +294,6 @@ export function buildPlanetAPIResponse(apiStatus: StatusAPI) {
     for (let i = 0; i < apiStatus.status.campaigns.length; i++) {
       let campaign = apiStatus.status.campaigns[i]
 
-      const planets = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public/json/planets.json"), 'utf-8'))
 
       let planetImage = "";
       const imgPath = path.join(process.cwd(), "public/" + planets[campaign.planetIndex].img);

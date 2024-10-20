@@ -33,8 +33,8 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
     const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
 
     const defenseProgress: PlanetEventAPI[] = useSWR((props.majorOrder.determinedType == MajorOrderType.defend) ? "/api/status/orders/defenseProgress?eventId=" + props.majorOrder.id32 : null, fetcher, { refreshInterval: 30000 }).data
-    // console.log(props.majorOrder.determinedType)
-    // console.log("Assignment enemy: " + props.majorOrder.enemyID)
+    console.log(props.majorOrder.determinedType)
+    console.log("Assignment enemy: " + props.majorOrder.enemyID)
     
     //console.log(endtime)
     useEffect(() => {
@@ -143,8 +143,8 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
                             <div className="grid grid-cols-2 gap-4 mt-4 px-3 py-3 w-full" style={{ backgroundColor: "#0c0c0d", borderRadius: "10px" }}>
                                 {(defenseTracker != undefined && props.majorOrder.determinedType == MajorOrderType.defend) ?
                                     
-                                    defenseTracker.map((campaign) => (
-                                        <Checkbox key={campaign.name} isSelected={campaign.completed} isReadOnly={true} icon={<Image src='/images/helldivers_skull.svg' />}>{campaign.name}</Checkbox>
+                                    defenseTracker.map((campaign, index) => (
+                                        <Checkbox key={campaign.name+"_"+index} isSelected={campaign.completed} isReadOnly={true} icon={<Image src='/images/helldivers_skull.svg' />}>{campaign.name}</Checkbox>
                                     ))
                                     :
                                     assignment.setting.tasks.map((task, index) => (

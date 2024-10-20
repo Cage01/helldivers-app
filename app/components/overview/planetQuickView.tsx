@@ -22,7 +22,7 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
     const apiStatus: StatusAPI = (useSWR("/api/status", fetcher, { refreshInterval: 20000 })).data;
     const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
 
-    const apiHistorical: HistoricalAPI[] = (useSWR("/api/historical?hours=1", fetcher, { refreshInterval: 60000 })).data
+    const apiHistorical: HistoricalAPI[] = (useSWR("/api/historical?hours=1", fetcher, { refreshInterval: 300000 })).data
     const majorOrder: Assignment = (useSWR("/api/status/orders", fetcher, { refreshInterval: 20000 })).data;
 
     useEffect(() => {
@@ -43,6 +43,7 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
                 const tmpDecay = getDecayRate(p.maxHealth, p.status.regenPerSecond, p.hasEvent, apiHistorical.find(h => h.campaignId == p.campaign.id)?.progress)
                 let prd = Math.ceil(Math.max(((100 - p.liberation) / tmpDecay), 0) * 60 * 60) + apiStatus.status.time
                 tmpMap.set(p.index, prd);
+                // console.log(p.name + ": " + (prd - apiStatus.status.time))
             }
 
 
@@ -206,12 +207,20 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
                                         } */}
                                     </TableCell>
                                     <TableCell>
-                                        <CountdownTimer className='text-tiny flex'
-                                            classNames={{
-                                                span: "flex-grow pr-[2px]"
-                                            }}
-                                            currentTime={apiStatus.status.time}
-                                            endTime={victoryMap?.get(planet.index)} />
+
+                                        {
+                                            // @ts-ignore: Object is possibly 'null'.
+                                            ((victoryMap?.get(planet.index) - apiStatus.status.time) < 864000 && (victoryMap?.get(planet.index) - apiStatus.status.time > 0)) ?
+                                            <CountdownTimer className='text-tiny flex'
+                                                classNames={{
+                                                    span: "flex-grow pr-[2px]"
+                                                }}
+                                                currentTime={apiStatus.status.time}
+                                                endTime={victoryMap?.get(planet.index)} />
+                                                :
+                                                <p className='text-tiny text-gray-600'>Victory Unknown</p>
+                                        }
+
                                     </TableCell>
 
                                 </TableRow>

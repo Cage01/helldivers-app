@@ -61,7 +61,7 @@ function TimelineComponent(props: { newsFeed: NewsFeed[] }) {
                     items={items}
                     mode="HORIZONTAL"
                     //cardLess={true}
-                    disableToolbar={true}
+                    disableToolbar={false}
                     timelinePointShape="diamond"
                     timelinePointDimension={15}
                     cardHeight={400}
@@ -70,7 +70,9 @@ function TimelineComponent(props: { newsFeed: NewsFeed[] }) {
                     // slideShowType="reveal"
                     theme={{
                         cardTitleColor: "#FFF",
-
+                        toolbarBtnBgColor: "#18181a",
+                        toolbarTextColor: "#eaeaea",
+                        toolbarBgColor: "#0c0c0d",
                         cardDetailsColor: "#FFF",
                         cardDetailsBackGround: "#0c0c0d",
                         cardSubtitleColor: "#FFF",
@@ -87,15 +89,15 @@ function TimelineComponent(props: { newsFeed: NewsFeed[] }) {
                             <div className="pt-2 w-[100%] flex-row flex-wrap justify-center items-center flex">
                                 <Image
                                     className=''
-                                    style={{ margin: "auto", display: "block", opacity: "0.7" }}
+                                    style={{ margin: "auto", display: "block" }}
                                     src='/images/helldivers_skull.svg'
                                     width={50} />
                             </div>
                             <div className="w-[100%]">
-                                <h2 className="text-center text-xl pb-4">Battle Report</h2>
+                                <h2 className="text-center text-xl pb-4 subtitle">Battle Report</h2>
 
                             </div>
-
+                            <Divider />
 
                             <CardHeader style={{ backgroundColor: "#0c0c0d", borderRadius: 0 }}>
                                 {(filledArray.length > 0) ?

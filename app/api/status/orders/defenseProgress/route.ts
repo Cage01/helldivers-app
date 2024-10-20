@@ -34,7 +34,7 @@ async function requestHandler(_request: Request): Promise<Response> {
 
         successfulDefenses.push({
             planetName: getPlanetNameFromID(event.planetIndex),
-            ...event
+            ...event,
         })
     });
 

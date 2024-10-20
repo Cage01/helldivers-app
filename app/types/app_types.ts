@@ -1,6 +1,6 @@
 import { GalaxyStatus } from "./api/helldivers/galaxy_status_types";
 import { WarInfo } from "./api/helldivers/war_info_types";
-import { FCampaignProgress, FTimestamp } from "./firebase_types";
+import { FProgress, FTimestamp } from "./firebase_types";
 
 export type PlanetsAPI = {
     id:      number;
@@ -15,12 +15,11 @@ export type StatusAPI = {
 
 export type HistoricalAPI = {
     campaignId: number,
-    progress: FCampaignProgress[]
+    progress: FProgress[]
 }
 
 export type PlanetEventAPI = {
     planetName:        string;
-    campaignCount:     number;
     campaignId:        number;
     created:           FTimestamp;
     eventType:         number;

@@ -6,11 +6,17 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        ".vscode": true,
         ".firebase": true,
-        ".next": true
+        ".next": true,
+        ".vscode": true,
+        "app/types/api/helldivers/galaxy_status_types.js": true,
+        "app/types/api/helldivers/war_info_types.js": true,
+        ".gcloudignore": true
     },
     "hide-files.files": [
-        ".vscode"
+        ".vscode",
+        "app/types/api/helldivers/galaxy_status_types.js",
+        "app/types/api/helldivers/war_info_types.js",
+        ".gcloudignore"
     ]
 }

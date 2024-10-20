@@ -9,7 +9,8 @@ export enum MajorOrderType {
     unknown = -1,
     liberate = 0,
     control = 1,
-    defend = 2
+    defend = 2,
+    kill = 3
 }
 
 export enum EventResult {

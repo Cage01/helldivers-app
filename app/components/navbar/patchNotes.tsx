@@ -2,8 +2,8 @@
 import React from 'react'
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure, Image, Divider, Chip } from "@nextui-org/react";
 import { PressEvent } from '@react-types/shared';
-import BBCode from '@bbob/react/lib';
-import presetReact from '@bbob/preset-react/lib';
+import BBCode from '@bbob/react';
+import presetReact from '@bbob/preset-react';
 
 import { Newsitem, SteamNews } from '@/app/types/api/steam/steam_news_types';
 import moment from 'moment-timezone';
@@ -26,7 +26,10 @@ function PatchNotesButton(props: { news: SteamNews }) {
     //console.log(props.news.appnews)
     for (var i = 0; i < props.news.appnews.newsitems.length; i++) {
         var newsItem: Newsitem = props.news.appnews.newsitems[i];
-        //console.log(newsItem)
+        if (newsItem.contents.includes("previewyoutube")) {
+            console.log("found skipping")
+            continue;
+        }
 
         //check tags
         let hasTag = false;
@@ -44,6 +47,8 @@ function PatchNotesButton(props: { news: SteamNews }) {
         if (newsItem.feed_type == 1 && (hasTag || newsItem.feedname == "steam_community_announcements" && match)) {
             let content = newsItem.contents
                 //.replace(/[^\p{L}\p{N}\p{P}\p{Z}{^$=+±\\'|`\\~<>}]/gu, "")
+                .replace(/“|”/g, '"')
+                .replace(/‘|’/g, '\'')
                 .replace("[b]Fixes", "🔧 [b]Fixes")
                 .replace("[b]Overview", "🌎 [b]Overview")
                 .replace("[b]Known Issues", "🧠 [b]Known Issues")
@@ -56,16 +61,24 @@ function PatchNotesButton(props: { news: SteamNews }) {
 
             //Parse patch number if possible and grab contents
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            newsItems.push({
-                patchNum: newsItem.title.split(/(\d.*)/, 2)[1],
-                title: newsItem.title.replaceAll("🛠️", "").replaceAll("⚙️",""),
-                date: moment(new Date(newsItem.date * 1000)).tz(tz).format('MMM DD YYYY HH:mm A'),
-                contents: content
-            })
+                newsItems.push({
+                    patchNum: newsItem.title.split(/(\d.*)/, 2)[1],
+                    title: newsItem.title.replaceAll("🛠️", "").replaceAll("⚙️",""),
+                    date: moment(new Date(newsItem.date * 1000)).tz(tz).format('MMM DD YYYY HH:mm A'),
+                    contents: content
+                })
+
+
             //break
         }
     }
+    // /console.log(newsItems)
+    for (let i = 0; i < 31; i++) {
+        newsItems.pop()
+    }
 
+    console.log(newsItems[newsItems.length - 1])
+    
 
     // onPress={onOpen}
     return (

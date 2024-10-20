@@ -16,6 +16,7 @@ import { fetcher } from '@/app/classes/fetch';
 import useSWR from 'swr';
 import { Skeleton } from '@nextui-org/react';
 import { HistoricalAPI } from '@/app/types/app_types';
+import { FProgress } from '@/app/types/firebase_types';
 
 ChartJS.register(
     CategoryScale,
@@ -67,7 +68,7 @@ function CardLineChart(props: { campaignID: number, planetID: number }) {
     //console.log(data.datasets[0].data)
 
     //build dataset
-    const data: HistoricalAPI[] = useSWR("/api/historical?planetID=" + props.planetID + "&campaignID=" + props.campaignID + "&hours=48", fetcher, { refreshInterval: 60000 }).data;
+    const data: HistoricalAPI[] = useSWR("/api/historical?planetID=" + props.planetID + "&campaignID=" + props.campaignID + "&hours=48", fetcher, { refreshInterval: 300000 }).data;
     const [dataset, setDataset] = useState<chartset>()
 
     useEffect(() => {
@@ -76,8 +77,10 @@ function CardLineChart(props: { campaignID: number, planetID: number }) {
             let playerData: number[] = []; //playerData
             let liberationData: number[] = []; //liberationData
 
-            data[0].progress.forEach((element: { created: number; playerCount: number; health: number; maxHealth: number; }) => {
-                let date = moment(new Date(element.created * 1000)).format("M/D/YY hh:mm A")
+            // console.log(data[0].progress[0].created)
+            // console.log(new Date(data[0].progress[0].created.seconds * 1000))
+            data[0].progress.forEach((element: FProgress) => {
+                let date = moment(new Date(element.created.seconds * 1000)).format("M/D/YY hh:mm A")
                 labels.push(date)
                 playerData.push(element.playerCount)
                 liberationData.push(getLiberationPercentage(element.health, element.maxHealth))

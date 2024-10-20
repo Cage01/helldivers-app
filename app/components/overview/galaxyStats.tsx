@@ -28,13 +28,18 @@ function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, ti
     const [historicalStats, setHistoricalStats] = useState<ChartData>();
 
     const reqStats = (useSWR("/api/status/stats", fetcher, { refreshInterval: 20000 })).data
-    const reqHistory = (useSWR("/api/historical/stats/from/" + props.time, fetcher, { refreshInterval: 20000 })).data
+    const reqHistory = (useSWR("/api/historical/stats/from/" + props.time, fetcher, { refreshInterval: 1800000 })).data
+    console.log(props.time)
 
     //console.log(missionsWon)
 
     useEffect(() => {
+        
+
         //console.log(reqStats)
         if (reqStats != undefined && props.majorOrder != undefined && reqHistory != undefined) {
+            console.log(reqHistory)
+            console.log(reqStats.galaxy_stats)
             setAssignment(props.majorOrder)
             //console.log(reqStats.data)
             //setStats(reqStats)
@@ -66,24 +71,65 @@ function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, ti
             };
 
 
+            let max = 10000000
             for (let i = 1; i < reqHistory.length; i++) {
+                // let deaths = reqHistory[i].deaths - reqHistory[i - 1].deaths
+                // console.log("Deaths: " + deaths)
+                // tmpTrend.missionSuccessRate.push({ value: reqHistory[i].missionSuccessRate - reqHistory[i - 1].missionSuccessRate, created: reqHistory[i].created })
+                // tmpTrend.deaths.push({ value: reqHistory[i].deaths - reqHistory[i - 1].deaths, created: reqHistory[i].created })
+                // tmpTrend.revives.push({ value: reqHistory[i].revives - reqHistory[i - 1].revives, created: reqHistory[i].created })
+                // tmpTrend.missionsWon.push({ value: reqHistory[i].missionsWon - reqHistory[i - 1].missionsWon, created: reqHistory[i].created })
+                // tmpTrend.timePlayed.push({ value: reqHistory[i].timePlayed - reqHistory[i - 1].timePlayed, created: reqHistory[i].created })
+                // tmpTrend.automatonKills.push({ value: reqHistory[i].automatonKills - reqHistory[i - 1].automatonKills, created: reqHistory[i].created })
+                // tmpTrend.illuminateKills.push({ value: reqHistory[i].illuminateKills - reqHistory[i - 1].illuminateKills, created: reqHistory[i].created })
+                // tmpTrend.missionsLost.push({ value: reqHistory[i].missionsLost - reqHistory[i - 1].missionsLost, created: reqHistory[i].created })
+                // tmpTrend.bulletsFired.push({ value: reqHistory[i].bulletsFired - reqHistory[i - 1].bulletsFired, created: reqHistory[i].created })
+                // tmpTrend.friendlies.push({ value: reqHistory[i].friendlies - reqHistory[i - 1].friendlies, created: reqHistory[i].created })
+                // tmpTrend.bulletsHit.push({ value: reqHistory[i].bulletsHit - reqHistory[i - 1].bulletsHit, created: reqHistory[i].created })
+                // tmpTrend.accurracy.push({ value: reqHistory[i].accurracy - reqHistory[i - 1].accurracy, created: reqHistory[i].created })
+                // tmpTrend.bugKills.push({ value: reqHistory[i].bugKills - reqHistory[i - 1].bugKills, created: reqHistory[i].created })
+                // tmpTrend.missionTime.push({ value: reqHistory[i].missionTime - reqHistory[i - 1].missionTime, created: reqHistory[i].created })
 
-                tmpTrend.missionSuccessRate.push({ value: reqHistory[i].missionSuccessRate - reqHistory[i - 1].missionSuccessRate, created: reqHistory[i].created })
-                tmpTrend.deaths.push({ value: reqHistory[i].deaths - reqHistory[i - 1].deaths, created: reqHistory[i].created })
-                tmpTrend.revives.push({ value: reqHistory[i].revives - reqHistory[i - 1].revives, created: reqHistory[i].created })
-                tmpTrend.missionsWon.push({ value: reqHistory[i].missionsWon - reqHistory[i - 1].missionsWon, created: reqHistory[i].created })
-                tmpTrend.timePlayed.push({ value: reqHistory[i].timePlayed - reqHistory[i - 1].timePlayed, created: reqHistory[i].created })
-                tmpTrend.automatonKills.push({ value: reqHistory[i].automatonKills - reqHistory[i - 1].automatonKills, created: reqHistory[i].created })
-                tmpTrend.illuminateKills.push({ value: reqHistory[i].illuminateKills - reqHistory[i - 1].illuminateKills, created: reqHistory[i].created })
-                tmpTrend.missionsLost.push({ value: reqHistory[i].missionsLost - reqHistory[i - 1].missionsLost, created: reqHistory[i].created })
-                tmpTrend.bulletsFired.push({ value: reqHistory[i].bulletsFired - reqHistory[i - 1].bulletsFired, created: reqHistory[i].created })
-                tmpTrend.friendlies.push({ value: reqHistory[i].friendlies - reqHistory[i - 1].friendlies, created: reqHistory[i].created })
-                tmpTrend.bulletsHit.push({ value: reqHistory[i].bulletsHit - reqHistory[i - 1].bulletsHit, created: reqHistory[i].created })
-                tmpTrend.accurracy.push({ value: reqHistory[i].accurracy - reqHistory[i - 1].accurracy, created: reqHistory[i].created })
-                tmpTrend.bugKills.push({ value: reqHistory[i].bugKills - reqHistory[i - 1].bugKills, created: reqHistory[i].created })
-                tmpTrend.missionTime.push({ value: reqHistory[i].missionTime - reqHistory[i - 1].missionTime, created: reqHistory[i].created })
 
+          
+                  let deaths = reqHistory[i].deaths - reqHistory[i - 1].deaths
+                  if (deaths > 0 && deaths < max)
+                    tmpTrend.deaths.push({ value: deaths, created: reqHistory[i].created })
+          
+                  let missionsWon = reqHistory[i].missionsWon - reqHistory[i - 1].missionsWon
+                  if (missionsWon > 0 && missionsWon < max)
+                    tmpTrend.missionsWon.push({ value: missionsWon, created: reqHistory[i].created })
+          
+                  let automatonKills = reqHistory[i].automatonKills - reqHistory[i - 1].automatonKills
+                  if (automatonKills > 0 && automatonKills < max)
+                    tmpTrend.automatonKills.push({ value: automatonKills, created: reqHistory[i].created })
+                  
+                  let missionsLost = reqHistory[i].missionsLost - reqHistory[i - 1].missionsLost
+                  if (missionsLost > 0 && missionsLost < max)
+                    tmpTrend.missionsLost.push({ value: missionsLost, created: reqHistory[i].created })
+                  
+                  let bulletsFired = reqHistory[i].bulletsFired - reqHistory[i - 1].bulletsFired
+                  if (bulletsFired > 0 && bulletsFired < max)
+                    tmpTrend.bulletsFired.push({ value: bulletsFired, created: reqHistory[i].created })
+                  
+                  let bulletsHit = reqHistory[i].bulletsHit - reqHistory[i - 1].bulletsHit
+                  if (bulletsHit > 0 && bulletsHit < max)
+                    tmpTrend.bulletsHit.push({ value: bulletsHit, created: reqHistory[i].created })
+                  
+                  let bugKills = reqHistory[i].bugKills - reqHistory[i - 1].bugKills
+                  if (bugKills > 0 && bugKills < max)
+                    tmpTrend.bugKills.push({ value: bugKills, created: reqHistory[i].created })
+
+                  let timePlayed = reqHistory[i].timePlayed - reqHistory[i - 1].timePlayed
+                  if (timePlayed > 0 && timePlayed < max)
+                    tmpTrend.timePlayed.push({ value: timePlayed, created: reqHistory[i].created })
+
+                  let friendlyKills = reqHistory[i].friendlies - reqHistory[i - 1].friendlies
+                  if (friendlyKills > 0 && friendlyKills < max)
+                    tmpTrend.friendlies.push({ value: reqHistory[i].friendlies - reqHistory[i - 1].friendlies, created: reqHistory[i].created })
             }
+
+            console.log(tmpTrend)
 
             setHistoricalStats(tmpTrend)
         }

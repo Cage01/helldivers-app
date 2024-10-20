@@ -2,7 +2,7 @@
 import React from 'react'
 import './timeline.scss'
 import '@/app/globals.css'
-import '@/app/stars.css'
+import '@/app/stars.scss'
 import TimelineComponent from './components/timeline';
 import { Image } from '@nextui-org/react'
 import { queryNewsFeedExternal } from '../utilities/server_functions';

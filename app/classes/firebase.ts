@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, query, collection, orderBy, getDocs, where, doc, getDoc, collectionGroup, and, limit, onSnapshot, QuerySnapshot } from "firebase/firestore";
-import { FCampaignProgress, FGlobalEvent } from "../types/firebase_types";
+import { getFirestore, query, collection, orderBy, getDocs, where, collectionGroup, limit } from "firebase/firestore";
+import { FProgress, FGlobalEvent } from "../types/firebase_types";
 import { EventResult } from "./enums";
 
 
@@ -35,7 +35,7 @@ export default class FirebaseInstance {
 
         const qsProg = await getDocs(qProg);
 
-        let prog: FCampaignProgress[] = []
+        let prog: FProgress[] = []
         // qsProg.forEach(async element => {
         //     prog = await element.data() as FirebaseCampaignProgress[];
         // });
@@ -43,8 +43,7 @@ export default class FirebaseInstance {
         for (let i = 0; i < qsProg.docs.length; i++) {
             //console.log(qsProg.docs[i].data())
             let tmp = qsProg.docs[i].data()
-            tmp.created = tmp.created.seconds;
-            prog.push(tmp as FCampaignProgress)
+            prog.push(tmp as FProgress)
         }
 
         return prog;
@@ -70,14 +69,17 @@ export default class FirebaseInstance {
         const q = query(collectionGroup(this.db, "GlobalEvents"), orderBy("updated", "desc"), limit(1));
 
         const eventSnapshot = await getDocs(q);
+        
         // eventSnapshot.metadata
         return eventSnapshot.docs[0].data() as FGlobalEvent;
     }
 
     async getGlobalEventByID(id: number) {
+        //console.log(id)
         const q = query(collectionGroup(this.db, "GlobalEvents"), where("id", "==", id), limit(1));
 
         const eventSnapshot = await getDocs(q);
+        //console.log(eventSnapshot)
         // eventSnapshot.metadata
         return eventSnapshot.docs[0].data() as FGlobalEvent;
     }
@@ -101,7 +103,7 @@ export default class FirebaseInstance {
     }
 
     async getSuccessfulDefenseCampaigns(from: Date, to: Date) {
-        const q = query(collectionGroup(this.db, "Events"), where("updated", ">=", from), where("updated", "<=", to), where("resultFlag", "==", EventResult.success))
+        const q = query(collectionGroup(this.db, "Campaigns"), where("updated", ">=", from), where("updated", "<=", to), where("hasEvent", "==", true), where("resultFlag", "==", EventResult.success))
         const snapshot = await getDocs(q);
         
         return snapshot.docs;

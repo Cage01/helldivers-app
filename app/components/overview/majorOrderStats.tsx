@@ -34,6 +34,7 @@ function MajorOrderStats(props: { war: { status: GalaxyStatus, info: WarInfo, ca
 
   useEffect(() => {
     if (props.assignment != undefined && reqHistory != undefined && props.war != undefined) {
+      //console.log(reqHistory)
       setAssignment(props.assignment)
 
       const taskSet = new Set();
@@ -93,18 +94,41 @@ function MajorOrderStats(props: { war: { status: GalaxyStatus, info: WarInfo, ca
       };
 
 
+      let max = 10000000
       for (let i = 1; i < reqHistory.length; i++) {
 
-        tmpTrend.deaths.push({ value: reqHistory[i].deaths - reqHistory[i - 1].deaths, created: reqHistory[i].created })
-        tmpTrend.missionsWon.push({ value: reqHistory[i].missionsWon - reqHistory[i - 1].missionsWon, created: reqHistory[i].created })
-        tmpTrend.automatonKills.push({ value: reqHistory[i].automatonKills - reqHistory[i - 1].automatonKills, created: reqHistory[i].created })
-        tmpTrend.missionsLost.push({ value: reqHistory[i].missionsLost - reqHistory[i - 1].missionsLost, created: reqHistory[i].created })
-        tmpTrend.bulletsFired.push({ value: reqHistory[i].bulletsFired - reqHistory[i - 1].bulletsFired, created: reqHistory[i].created })
-        tmpTrend.bulletsHit.push({ value: reqHistory[i].bulletsHit - reqHistory[i - 1].bulletsHit, created: reqHistory[i].created })
-        tmpTrend.bugKills.push({ value: reqHistory[i].bugKills - reqHistory[i - 1].bugKills, created: reqHistory[i].created })
+        let deaths = reqHistory[i].deaths - reqHistory[i - 1].deaths
+        if (deaths > 0 && deaths < max)
+          tmpTrend.deaths.push({ value: deaths, created: reqHistory[i].created })
+
+        let missionsWon = reqHistory[i].missionsWon - reqHistory[i - 1].missionsWon
+        if (missionsWon > 0 && missionsWon < max)
+          tmpTrend.missionsWon.push({ value: missionsWon, created: reqHistory[i].created })
+
+        let automatonKills = reqHistory[i].automatonKills - reqHistory[i - 1].automatonKills
+        if (automatonKills > 0 && automatonKills < max)
+          tmpTrend.automatonKills.push({ value: automatonKills, created: reqHistory[i].created })
+        
+        let missionsLost = reqHistory[i].missionsLost - reqHistory[i - 1].missionsLost
+        if (missionsLost > 0 && missionsLost < max)
+          tmpTrend.missionsLost.push({ value: missionsLost, created: reqHistory[i].created })
+        
+        let bulletsFired = reqHistory[i].bulletsFired - reqHistory[i - 1].bulletsFired
+        if (bulletsFired > 0 && bulletsFired < max)
+          tmpTrend.bulletsFired.push({ value: bulletsFired, created: reqHistory[i].created })
+        
+        let bulletsHit = reqHistory[i].bulletsHit - reqHistory[i - 1].bulletsHit
+        if (bulletsHit > 0 && bulletsHit < max)
+          tmpTrend.bulletsHit.push({ value: bulletsHit, created: reqHistory[i].created })
+        
+        let bugKills = reqHistory[i].bugKills - reqHistory[i - 1].bugKills
+        if (bugKills > 0 && bugKills < max)
+          tmpTrend.bugKills.push({ value: bugKills, created: reqHistory[i].created })
 
       }
 
+
+      //console.log(tmpTrend)
       setHistoricalStats(tmpTrend)
 
       //   let tmpTabs: { name: string, index: number }[] = []

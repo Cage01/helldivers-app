@@ -12,7 +12,7 @@ function AlertCarousel(props: { alertItems: AlertItem[] }) {
 
 
 
-    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 15000 })])
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 20000 })])
 
     const onNavButtonClick = useCallback((emblaApi: EmblaCarouselType) => {
         const autoplay = emblaApi?.plugins()?.autoplay as AutoplayType

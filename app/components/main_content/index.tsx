@@ -51,7 +51,7 @@ function MainContent() {
                 if (planet.majorOrderAssociation == MajorOrderAssociation.mainObjective) {
                     tmpMain.push(planet)
                 }
-                else if (index < ((allPlanets.length / 2) - 1)) {
+                else if (index < ((allPlanets.length / 2) - 1) && tmpMain.length < 3) {
                     tmpMain.push(planet)
                 } else {
                     tmpSecondary.push(planet)

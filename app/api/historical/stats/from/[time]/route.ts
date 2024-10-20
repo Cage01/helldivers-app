@@ -7,6 +7,7 @@ async function requestHandler(_request: Request): Promise<Response> {
     const tmp = params.pathname.split("/")
     const time: number = Number(tmp[tmp.length - 1])
 
+    console.log(new Date(time))
 
     //Get event created time
     const firebase = new FirebaseInstance();
