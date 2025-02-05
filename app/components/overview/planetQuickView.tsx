@@ -102,7 +102,7 @@ function PlanetQuickView(props: { majorOrder: Assignment, className?: string }) 
 
                     {/* <Tabs key={1} variant={"underlined"} aria-label="Tabs PlanetView"> */}
                     {/* <Tab className='w-full' key="pl" title="Live"> */}
-                    <Table aria-label="planet_quick_view" className='w-full'>
+                    <Table aria-label="planet_quick_view" className='w-full h-[32rem]'>
                         <TableHeader>
                             <TableColumn>Planet</TableColumn>
                             <TableColumn>Liberation</TableColumn>

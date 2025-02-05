@@ -38,8 +38,8 @@ function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, ti
 
         //console.log(reqStats)
         if (reqStats != undefined && props.majorOrder != undefined && reqHistory != undefined) {
-            console.log(reqHistory)
-            console.log(reqStats.galaxy_stats)
+            //console.log(reqHistory)
+            //console.log(reqStats.galaxy_stats)
             setAssignment(props.majorOrder)
             //console.log(reqStats.data)
             //setStats(reqStats)
@@ -129,7 +129,7 @@ function GalaxyStatsCard(props: { className?: string, majorOrder: Assignment, ti
                     tmpTrend.friendlies.push({ value: reqHistory[i].friendlies - reqHistory[i - 1].friendlies, created: reqHistory[i].created })
             }
 
-            console.log(tmpTrend)
+            //console.log(tmpTrend)
 
             setHistoricalStats(tmpTrend)
         }

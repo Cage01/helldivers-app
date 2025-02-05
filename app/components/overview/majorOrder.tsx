@@ -33,8 +33,8 @@ function MajorOrderCard(props: { className?: string, majorOrder: Assignment }) {
     const apiPlanets: PlanetsAPI[] = (useSWR("/api/planets", fetcher, { refreshInterval: 20000 })).data;
 
     const defenseProgress: PlanetEventAPI[] = useSWR((props.majorOrder.determinedType == MajorOrderType.defend) ? "/api/status/orders/defenseProgress?eventId=" + props.majorOrder.id32 : null, fetcher, { refreshInterval: 30000 }).data
-    console.log(props.majorOrder.determinedType)
-    console.log("Assignment enemy: " + props.majorOrder.enemyID)
+    // console.log(props.majorOrder.determinedType)
+    // console.log("Assignment enemy: " + props.majorOrder.enemyID)
     
     //console.log(endtime)
     useEffect(() => {

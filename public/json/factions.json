@@ -10,5 +10,9 @@
     "3": {
         "name": "Automaton",
         "image": "/images/automaton.svg"
+    },
+    "4": {
+        "name": "Iluminate",
+        "image": "/images/illuminate.webp"
     }
 }

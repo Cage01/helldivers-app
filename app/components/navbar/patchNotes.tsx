@@ -77,7 +77,7 @@ function PatchNotesButton(props: { news: SteamNews }) {
         newsItems.pop()
     }
 
-    console.log(newsItems[newsItems.length - 1])
+    //console.log(newsItems[newsItems.length - 1])
     
 
     // onPress={onOpen}
